@@ -2,216 +2,296 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Swissport AirScope - 2026 March Ultimate Edition</title>
-    
-    <!-- External Libraries with standard CDN -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swissport AirScope - Monthly Aviation Insights</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #F8FAFC; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #F8FAFC; padding-top: 80px; }
         .gradient-bg { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); }
-        .chart-container { position: relative; width: 100%; height: 240px; margin: 0 auto; }
-        
-        /* 타이틀 깨짐 방지 및 반응형 폰트 */
-        .keep-all { word-break: keep-all; overflow-wrap: break-word; }
-        .title-responsive { font-size: clamp(1.4rem, 5.5vw, 1.875rem); line-height: 1.3; }
-        
-        /* Interactive Answer Box */
-        .answer-box { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .card-active .answer-box { max-height: 400px; opacity: 1; margin-top: 1rem; }
-        .card-active .chevron-icon { transform: rotate(180deg); }
-        .chevron-icon { transition: transform 0.3s ease; }
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 280px; }
+        .stat-card { transition: all 0.3s ease; display: flex; flex-direction: column; height: 100%; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .source-tag { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+        .link-btn { font-size: 11px; font-weight: 700; color: #2563EB; border: 1px solid #BFDBFE; padding: 4px 12px; border-radius: 6px; transition: all 0.2s; background: white; white-space: nowrap; }
+        .link-btn:hover { background-color: #EFF6FF; border-color: #3B82F6; }
 
-        /* Dark Section Styling */
-        .dark-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1rem; padding: 1.25rem; }
-        
-        @media (max-width: 640px) {
-            .section-padding { padding: 1.25rem; }
-            .chart-container { height: 200px; }
+        /* Floating Top Bar */
+        .floating-header {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            max-width: 1200px;
+            height: 60px;
+            background: rgba(30, 58, 138, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        /* Podcast Section */
+        .podcast-controls { display: flex; align-items: center; gap: 12px; flex-grow: 1; max-width: 60%; }
+        .youtube-bar {
+            flex-grow: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            position: relative;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .youtube-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: #ef4444;
+            width: 0%;
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        /* Answer Animation */
+        .answer-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .answer-content.open {
+            max-height: 500px;
+            opacity: 1;
+            margin-top: 15px;
+        }
+
+        /* Floating Badge */
+        .date-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-weight: 900;
+            font-size: 14px;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
     </style>
 </head>
-<body class="text-gray-800 antialiased leading-relaxed">
+<body class="text-gray-800 antialiased">
 
-    <!-- Header -->
-    <header class="gradient-bg text-white shadow-xl sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2 sm:space-x-3">
-                <div class="bg-white p-1 rounded shadow-inner">
-                    <!-- 로고 파일명 수정: spkLogoNEW.jpg -->
-                    <img src="spkLogoNEW.jpg" alt="Swissport Logo" class="h-7 sm:h-10 object-contain" onerror="this.outerHTML='<span class=\'text-blue-900 font-black text-xs sm:text-base px-1\'>SWISSPORT</span>'">
-                </div>
-                <div>
-                    <h1 class="text-lg sm:text-2xl font-black tracking-tighter leading-none">AirScope</h1>
-                    <p class="text-[8px] sm:text-[10px] text-blue-100 uppercase tracking-widest font-bold mt-0.5">Aviation Intelligence</p>
-                </div>
+    <!-- New Floating Header -->
+    <div class="floating-header">
+        <div class="podcast-controls">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black uppercase tracking-tighter text-blue-200">AI Podcast</span>
+                <button id="playBtn" class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition">
+                    <svg id="playIcon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIcon" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
             </div>
-            <div class="text-right">
-                <p class="text-[10px] sm:text-sm font-black italic tracking-tighter">2026 MARCH</p>
+            <div class="youtube-bar" id="progressContainer">
+                <div class="youtube-progress" id="progressBar"></div>
+            </div>
+            <span id="currentTime" class="text-[10px] font-mono text-blue-200 w-10">0:00</span>
+        </div>
+
+        <div class="date-badge">
+            2026 MARCH
+        </div>
+        
+        <audio id="podcastAudio">
+            <source src="1.m4a" type="audio/mp4">
+        </audio>
+    </div>
+
+    <!-- Header Section (Swissport Logo) -->
+    <header class="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="bg-white p-1 rounded shadow-sm border border-gray-100">
+                <img src="spk logo-NEW.jpg" alt="Swissport Logo" class="h-10 object-contain" onerror="this.outerHTML='<span class=\'text-blue-900 font-black text-xl px-2\'>SWISSPORT</span>'">
+            </div>
+            <div>
+                <h1 class="text-2xl font-black tracking-tighter leading-none text-blue-900">AirScope</h1>
+                <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold mt-1">Aviation & Security Intelligence</p>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 sm:space-y-10">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-8">
 
         <!-- Section 1: Strategic Summary -->
-        <section class="bg-white rounded-2xl shadow-lg border-l-[6px] sm:border-l-[12px] border-orange-500 section-padding sm:p-10">
-            <h2 class="title-responsive font-black text-blue-900 mb-4 tracking-tight keep-all">핵심 요약: 불확실성 속의 전략적 대응</h2>
-            <div class="space-y-4 text-[15px] sm:text-lg text-gray-700 font-medium keep-all leading-relaxed">
+        <section class="bg-white rounded-3xl shadow-xl p-8 border-l-[12px] border-orange-500 relative">
+            <h2 class="text-3xl font-black text-blue-900 mb-6">핵심 요약: 불확실성 속의 전략적 대응</h2>
+            <div class="space-y-4 text-lg text-gray-600 leading-relaxed font-medium">
                 <p>
-                    2026년 <strong>3월</strong> 항공업계는 <strong>이란발 중동 전쟁 리스크</strong>로 인한 국제 유가 변동성과 영공 폐쇄 가능성에 기민하게 대응하고 있습니다. 
-                    급변하는 정세 속에서 <strong>정책 파편화</strong>와 공급망 지연은 운영 비용을 상승시키는 주범으로 지목됩니다.
+                    2026년 항공업계는 <strong>이란발 중동 전쟁 리스크</strong>로 인한 국제 유가 변동성과 영공 폐쇄 가능성에 기민하게 대응하고 있습니다. 
+                    급변하는 정세 속에서 정책 분절화와 공급망 지연은 운영 비용을 상승시키는 주범으로 지목됩니다.
                 </p>
-                <p class="text-gray-500 text-sm sm:text-base">
-                    특히 여객 수요 증가에 따른 <strong>여객기 벨리(Belly Cargo)</strong> 과잉 공급은 화물 운임 하락 압박을 가하고 있으며, 스마트 인프라 도입이 효율성 개선의 돌파구가 되고 있습니다.
+                <p>
+                    특히 여객 수요 증가에 따른 <strong>여객기 벨리(Belly Cargo)</strong> 과잉 공급은 화물 운임 하락 압박을 가하고 있으며, 
+                    인천공항의 원격 보안 검색 및 인천항의 자동화 터미널과 같은 '스마트 인프라' 도입이 효율성 개선의 돌파구가 되고 있습니다.
                 </p>
             </div>
         </section>
 
-        <!-- Section 2: Market Analysis -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
-            <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-7 border border-gray-100 flex flex-col h-full">
+        <!-- Section 2: Market Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white rounded-2xl shadow-md p-6 stat-card border border-gray-100">
                 <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-base sm:text-xl font-bold text-gray-900 flex items-center">
-                        <span class="w-1.5 h-4 bg-blue-600 mr-2 rounded-full"></span>여객기 벨리 공급 추이
-                    </h3>
-                    <a href="https://www.extransglobal.com/blog/extrans-global-air-freight-news-week-07-2026-cn" target="_blank" rel="noopener noreferrer" class="text-[10px] sm:text-[11px] font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded-full hover:bg-blue-50 transition">News</a>
+                    <span class="source-tag bg-blue-100 text-blue-800 font-bold">Logistics Update</span>
+                    <a href="https://www.extransglobal.com/blog/extrans-global-air-freight-news-week-07-2026-cn" target="_blank" class="link-btn">화물 시장 뉴스</a>
                 </div>
-                <div class="bg-slate-50 rounded-xl p-3 flex-grow">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">여객기 벨리(Belly Cargo) 공급 추이</h3>
+                <div class="bg-slate-50 rounded-2xl p-4 flex-grow flex items-center mt-2">
                     <div class="chart-container">
                         <canvas id="cargoChart"></canvas>
                     </div>
                 </div>
+                <p class="mt-4 text-xs text-gray-500 font-medium italic">*여객 노선 정상화로 인한 하부 화물칸(Belly) 공급 급증 반영</p>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-7 border border-gray-100 flex flex-col h-full">
+            <div class="bg-white rounded-2xl shadow-md p-6 stat-card border border-gray-100">
                 <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-base sm:text-xl font-bold text-gray-900 flex items-center">
-                        <span class="w-1.5 h-4 bg-orange-500 mr-2 rounded-full"></span>2026 글로벌 5대 핵심 리스크
-                    </h3>
-                    <a href="https://worldaviationfestival.com/blog/airlines/iata-reveals-the-five-key-risks-shaping-aviation-in-2026/" target="_blank" rel="noopener noreferrer" class="text-[10px] sm:text-[11px] font-bold text-orange-600 border border-orange-200 px-3 py-1 rounded-full hover:bg-orange-50 transition">IATA Report</a>
+                    <span class="source-tag bg-orange-100 text-orange-800 font-bold">IATA Strategy</span>
+                    <a href="https://worldaviationfestival.com/blog/airlines/iata-reveals-the-five-key-risks-shaping-aviation-in-2026/" target="_blank" class="link-btn">IATA 리포트</a>
                 </div>
-                <div class="bg-slate-50 rounded-xl p-3 flex-grow">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">2026 글로벌 5대 핵심 리스크</h3>
+                <div class="bg-slate-50 rounded-2xl p-4 flex-grow flex items-center mt-2">
                     <div class="chart-container">
                         <canvas id="riskChart"></canvas>
                     </div>
                 </div>
+                <p class="mt-4 text-xs text-gray-500 font-medium italic">*IATA 선정: 정책 분절화가 업계 수익률(3.9%)을 위협하는 최대 요인</p>
             </div>
         </div>
 
-        <!-- Section 3: Smart Infrastructure -->
-        <section class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 section-padding sm:p-10">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 border-gray-50 gap-4">
-                <h3 class="text-lg sm:text-2xl font-black text-blue-900">디지털 커넥트: 스마트 조업 혁신</h3>
-                <div class="flex gap-2">
-                    <a href="https://worldaviationfestival.com/blog/airports/incheon-airport-launches-remote-baggage-screening-for-us-travel/" target="_blank" rel="noopener noreferrer" class="text-[10px] sm:text-[11px] font-extrabold text-blue-600 border border-blue-100 py-1.5 px-3 rounded-lg bg-blue-50">인천공항</a>
-                    <a href="https://www.porttechnology.org/incheon-begins-work-on-first-fully-automated-terminal/" target="_blank" rel="noopener noreferrer" class="text-[10px] sm:text-[11px] font-extrabold text-orange-600 border border-orange-100 py-1.5 px-3 rounded-lg bg-orange-50">인천항</a>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-12">
-                <div class="space-y-3">
-                    <div class="p-4 bg-blue-50 rounded-xl border-l-4 border-blue-500">
-                        <h4 class="font-bold text-blue-900 text-sm sm:text-base">인천공항 원격 보안 검색</h4>
-                        <p class="text-[11px] sm:text-sm text-gray-600 mt-1">수하물 원격 점검 시스템 도입으로 환승 시간을 <strong>20분 단축</strong>합니다.</p>
-                    </div>
-                    <div class="p-4 bg-orange-50 rounded-xl border-l-4 border-orange-500">
-                        <h4 class="font-bold text-orange-900 text-sm sm:text-base">인천항 완전 자동화 터미널</h4>
-                        <p class="text-[11px] sm:text-sm text-gray-600 mt-1">무인 운반 차량(AGV) 투입으로 물류 효율의 극대화를 달성했습니다.</p>
+        <!-- Section 3: Digital Connectivity -->
+        <section class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-8 flex-wrap gap-4 border-b pb-6 border-gray-100">
+                    <h3 class="text-2xl font-black text-blue-900">디지털 커넥트: 공항과 항만의 스마트 조업 혁신</h3>
+                    <div class="flex gap-2">
+                        <a href="https://worldaviationfestival.com/blog/airports/incheon-airport-launches-remote-baggage-screening-for-us-travel/" target="_blank" class="link-btn font-bold">원격 보안검색 뉴스</a>
+                        <a href="https://www.porttechnology.org/incheon-begins-work-on-first-fully-automated-terminal/" target="_blank" class="link-btn font-bold">인천항 자동화 뉴스</a>
                     </div>
                 </div>
-                <div class="bg-slate-50 rounded-xl p-4">
-                    <p class="text-center font-black text-[9px] text-gray-400 mb-2 uppercase tracking-widest italic">Innovation Impact Index</p>
-                    <div class="chart-container h-[180px] sm:h-[220px]">
-                        <canvas id="infraChart"></canvas>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div class="space-y-6">
+                        <div class="p-6 bg-blue-50 rounded-2xl border-l-4 border-blue-500">
+                            <h4 class="font-black text-blue-900 mb-2">인천공항: 세계 최초 원격 보안 검색</h4>
+                            <p class="text-sm text-gray-600">미국행 환승객 수하물을 원격으로 점검하여 환승 시간을 20분 단축합니다. 데이터 연결 기반의 차세대 보안 모델입니다.</p>
+                        </div>
+                        <div class="p-6 bg-orange-50 rounded-2xl border-l-4 border-orange-500">
+                            <h4 class="font-black text-orange-900 mb-2">인천항: 국내 최초 완전 자동화 터미널</h4>
+                            <p class="text-sm text-gray-600">무인 운반 차량(AGV)과 자동화 크레인이 투입된 사례로, 공항 보안과는 별개의 항만 물류 처리 혁신 프로젝트입니다.</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-6">
+                        <h4 class="text-center font-bold text-gray-700 mb-4 text-xs uppercase tracking-widest">Innovation Impact Index</h4>
+                        <div class="chart-container">
+                            <canvas id="infraChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Section 4: Data Security -->
-        <section class="bg-[#0F172A] rounded-2xl shadow-2xl overflow-hidden text-white section-padding sm:p-12">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-10">
-                <div>
-                    <h3 class="text-xl sm:text-2xl font-black tracking-tight">데이터 보안 인식 및 위협 분석</h3>
-                    <p class="text-blue-400 text-[10px] sm:text-sm font-medium italic mt-1 tracking-wide">Security Focus: JAL 항공 사례 및 사이버 보안 리포트</p>
+        <!-- Section 4: Security Analysis -->
+        <section class="bg-slate-900 rounded-3xl shadow-2xl overflow-hidden text-white">
+            <div class="p-8 md:p-12">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                    <div>
+                        <h3 class="text-2xl font-black mb-2 tracking-tight">데이터 보안 인식 및 위협 분석</h3>
+                        <p class="text-blue-300 text-sm font-medium">Industry Focus: JAL 항공 사례 및 사이버 보안 리포트</p>
+                    </div>
+                    <a href="https://strobes.co/blog/top-data-breaches-of-february-2026/" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-black text-xs transition shadow-lg uppercase">최신 보안 사고 리포트 (Feb 2026)</a>
                 </div>
-                <a href="https://strobes.co/blog/top-data-breaches-of-february-2026/" target="_blank" rel="noopener noreferrer" class="text-[10px] sm:text-[11px] bg-[#E11D48] hover:bg-red-700 px-5 py-2.5 rounded-lg font-black uppercase shadow-lg transition-colors">최신 보안 리포트 (FEB 2026)</a>
-            </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                <div class="lg:col-span-4 space-y-4">
-                    <div class="dark-card">
-                        <p class="text-[10px] text-orange-400 uppercase font-black mb-2 tracking-widest">Risk Management</p>
-                        <p class="text-xs sm:text-[13px] font-medium leading-relaxed italic keep-all">"JAL 항공의 개인정보 사고는 조업 시스템의 취약점 보완을 <strong>조기 파악하여 대처</strong>해야 함을 시사합니다."</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 flex flex-col justify-center space-y-6">
+                        <div class="bg-white/10 p-5 rounded-2xl border border-white/10">
+                            <p class="text-xs text-orange-400 uppercase font-black mb-2 tracking-widest">Risk Management</p>
+                            <p class="text-sm font-medium leading-relaxed">JAL 항공의 개인정보 사고는 조업 현장 시스템의 취약점 보완이 시급함을 보여줍니다. 기기 보안이 최우선입니다.</p>
+                        </div>
+                        <div class="bg-white/10 p-5 rounded-2xl border border-white/10">
+                            <p class="text-xs text-blue-400 uppercase font-black mb-2 tracking-widest">Internal Task</p>
+                            <p class="text-sm font-medium leading-relaxed">우리는 조업용 태블릿과 현장 단말기의 '데이터 보안 수칙'을 얼마나 철저히 실천하고 있습니까?</p>
+                        </div>
                     </div>
-                    <div class="dark-card">
-                        <p class="text-[10px] text-blue-400 uppercase font-black mb-2 tracking-widest">Operational Rule</p>
-                        <p class="text-xs sm:text-[13px] font-medium leading-relaxed keep-all">현장 기기 사용 시 불필요한 자동 로그인 기능을 해제하고 수시로 보안 점검을 수행해야 합니다.</p>
-                    </div>
-                </div>
-                
-                <div class="lg:col-span-8 bg-white/5 rounded-2xl p-4 sm:p-8 border border-white/10 flex flex-col sm:flex-row items-center gap-6">
-                    <div class="w-full sm:w-2/3 h-[250px] sm:h-[300px]">
-                        <canvas id="securityChart"></canvas>
-                    </div>
-                    <div class="w-full sm:w-1/3 flex flex-col gap-3">
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#3B82F6] rounded-sm"></span><span class="text-[10px] font-bold text-gray-300">피싱 & 사회공학</span></div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#60A5FA] rounded-sm"></span><span class="text-[10px] font-bold text-gray-300">랜섬웨어</span></div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#93C5FD] rounded-sm"></span><span class="text-[10px] font-bold text-gray-300">데이터 탈취</span></div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#F97316] rounded-sm"></span><span class="text-[10px] font-bold text-gray-300">기타</span></div>
+                    <div class="lg:col-span-2 bg-white/5 rounded-3xl p-6 border border-white/5">
+                        <div class="chart-container h-[300px]">
+                            <canvas id="securityChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Section 5: Discussion & Feedback (Click Events fixed) -->
-        <section class="bg-blue-900 rounded-2xl shadow-xl section-padding sm:p-10 text-white relative">
-            <div class="mb-8 text-center sm:text-left">
-                <h2 class="title-responsive font-black leading-tight">추가 탐구 과제</h2>
-                <p class="text-blue-300 font-bold text-xs sm:text-sm mt-1 uppercase tracking-wider">(Discussion & Feedback)</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Data Security Card -->
-                <div class="q-card bg-white/10 backdrop-blur-md p-5 rounded-xl border border-white/20 cursor-pointer transition-all hover:bg-white/20">
-                    <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-sm sm:text-base font-black text-orange-400">데이터 보안 인식</h4>
-                        <svg class="chevron-icon w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                    <p class="text-[12px] sm:text-sm text-blue-50 font-medium keep-all">현장 기기 보안 수칙을 숙지하고 있습니까?</p>
-                    <div class="answer-box">
-                        <div class="bg-blue-950/60 p-3 rounded-lg border-l-4 border-orange-500 text-[11px] sm:text-[13px] text-blue-100 italic leading-snug font-medium">
-                            "비밀번호 주기적 변경과 미사용 기기의 즉각적인 로그아웃은 데이터 보안의 시작입니다."
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Risk Response Card -->
-                <div class="q-card bg-white/10 backdrop-blur-md p-5 rounded-xl border border-white/20 cursor-pointer transition-all hover:bg-white/20">
-                    <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-sm sm:text-base font-black text-orange-400">리스크 대응 체계</h4>
-                        <svg class="chevron-icon w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                    <p class="text-[12px] sm:text-sm text-blue-50 font-medium keep-all">현장에 가장 큰 영향을 줄 요소는 무엇입니까?</p>
-                    <div class="answer-box">
-                        <div class="bg-blue-950/60 p-3 rounded-lg border-l-4 border-orange-500 text-[11px] sm:text-[13px] text-blue-100 italic leading-snug font-medium">
-                            "공급망 지연 상황에서는 실시간 인력 재배치와 유연한 스케줄링 능력이 핵심입니다."
+        <!-- Section 5: Discussion & Training Questions (Interactive Accordion) -->
+        <section class="bg-blue-900 rounded-3xl shadow-xl p-8 text-white relative overflow-hidden">
+            <h2 class="text-2xl font-black mb-8 flex items-center relative z-10">
+                <span class="text-3xl mr-3 font-normal">&#128161;</span> 추가 탐구 과제 (Discussion & Feedback)
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                <!-- Card 1 -->
+                <div class="flex flex-col">
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                        <h4 class="text-lg font-black mb-3 text-orange-400 underline underline-offset-8 decoration-2 group-hover:text-white">데이터 보안 인식</h4>
+                        <p class="text-sm text-blue-50 leading-relaxed font-medium">원격 검색과 같은 디지털 시스템 도입 시, 개인과 현장 기기에 대한 <strong>데이터 보안 수칙을 정확히 알고 있습니까?</strong></p>
+                        <p class="mt-4 text-xs text-blue-300 font-bold">클릭하여 답변 보기 →</p>
+                        
+                        <div class="answer-content">
+                            <div class="p-4 bg-white/5 rounded-xl border border-white/10 text-xs text-blue-100 leading-relaxed">
+                                <p class="mb-2 font-black text-orange-300">💡 추천 가이드</p>
+                                • 조업 태블릿 사용 후 상시 화면 잠금<br>
+                                • 공용 WiFi 대신 지정된 보안망만 사용<br>
+                                • 단말기 내 개인 정보 저장 엄금 및 분실 즉시 보고체계 가동
+                                <p class="mt-4 opacity-50 text-[10px] italic">*정확한 답은 아니니 참고만 하셔도 됩니다.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Efficiency Card -->
-                <div class="q-card bg-white/10 backdrop-blur-md p-5 rounded-xl border border-white/20 cursor-pointer transition-all hover:bg-white/20">
-                    <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-sm sm:text-base font-black text-orange-400">운영 효율성 제고</h4>
-                        <svg class="chevron-icon w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
+                <!-- Card 2 -->
+                <div class="flex flex-col">
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                        <h4 class="text-lg font-black mb-3 text-orange-400 underline underline-offset-8 decoration-2 group-hover:text-white">리스크 대응 체계</h4>
+                        <p class="text-sm text-blue-50 leading-relaxed font-medium">IATA가 경고한 5대 리스크 중 우리 조업 현장(Swissport Korea)에 가장 큰 영향을 줄 수 있는 요소는 무엇입니까?</p>
+                        <p class="mt-4 text-xs text-blue-300 font-bold">클릭하여 답변 보기 →</p>
+                        
+                        <div class="answer-content">
+                            <div class="p-4 bg-white/5 rounded-xl border border-white/10 text-xs text-blue-100 leading-relaxed">
+                                <p class="mb-2 font-black text-orange-300">💡 추천 가이드</p>
+                                • <strong>공급망 지연:</strong> 부품 수급난으로 인한 지상 조업 장비의 유지보수 차질 우려<br>
+                                • <strong>사이버 위협:</strong> 공항 내 스마트 시스템 마비 시 대체 수동 조업 매뉴얼 숙지 필요
+                                <p class="mt-4 opacity-50 text-[10px] italic">*정확한 답은 아니니 참고만 하셔도 됩니다.</p>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-[12px] sm:text-sm text-blue-50 font-medium keep-all">안전과 속도를 동시에 확보할 수 있습니까?</p>
-                    <div class="answer-box">
-                        <div class="bg-blue-950/60 p-3 rounded-lg border-l-4 border-orange-500 text-[11px] sm:text-[13px] text-blue-100 italic leading-snug font-medium">
-                            "태그 인식 고도화를 통해 수동 재검토를 줄여 안전과 속도를 모두 높여야 합니다."
+                </div>
+
+                <!-- Card 3 -->
+                <div class="flex flex-col">
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                        <h4 class="text-lg font-black mb-3 text-orange-400 underline underline-offset-8 decoration-2 group-hover:text-white">운영 효율성 제고</h4>
+                        <p class="text-sm text-blue-50 leading-relaxed font-medium">벨리 화물 급증 상황에서 안전과 처리 속도를 동시에 확보할 수 있는 현장 중심의 혁신 아이디어가 있습니까?</p>
+                        <p class="mt-4 text-xs text-blue-300 font-bold">클릭하여 답변 보기 →</p>
+                        
+                        <div class="answer-content">
+                            <div class="p-4 bg-white/5 rounded-xl border border-white/10 text-xs text-blue-100 leading-relaxed">
+                                <p class="mb-2 font-black text-orange-300">💡 추천 가이드</p>
+                                • 실시간 벨리 공간 모니터링 시스템 활용<br>
+                                • 화물 상하역 시 표준화된 스마트 팰릿 도입<br>
+                                • 현장 인력 간 실시간 웨어러블 통신 기기 도입을 통한 의사소통 시간 단축
+                                <p class="mt-4 opacity-50 text-[10px] italic">*정확한 답은 아니니 참고만 하셔도 됩니다.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -219,28 +299,81 @@
         </section>
 
         <!-- Footer -->
-        <footer class="text-center py-10 text-gray-400 text-[9px] sm:text-[10px] border-t border-gray-100 px-4 leading-relaxed">
-            <p class="font-black text-gray-500 mb-1 tracking-widest uppercase">© 2026 SWISSPORT KOREA</p>
-            <p>본 자료는 임직원 교육용 내부 문서이며 무단 배포를 금합니다.</p>
+        <footer class="text-center py-12 text-gray-400 text-[10px] border-t border-gray-200">
+            <p class="font-bold text-gray-500 mb-2 tracking-widest uppercase">© 2026 SWISSPORT KOREA - CONFIDENTIAL TRAINING DOCUMENT</p>
+            <p>본 자료는 임직원 지식 함양을 위해 제작된 내부 배포용 인포그래픽입니다.</p>
         </footer>
-
     </main>
 
     <script>
-        // Global Chart Settings
-        Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
-        Chart.defaults.color = '#94A3B8';
+        // Audio Player Logic
+        const audio = document.getElementById('podcastAudio');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
 
-        // 1. Cargo Chart
+        audio.onerror = () => { console.warn("Podcast file (1.m4a) not found."); };
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (audio.paused) {
+                audio.play().catch(e => {});
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                audio.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${percent}%`;
+            currentTimeEl.innerText = formatTime(audio.currentTime);
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickPos = (e.clientX - rect.left) / rect.width;
+            if (isFinite(audio.duration)) {
+                audio.currentTime = clickPos * audio.duration;
+            }
+        });
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Accordion Toggle Logic
+        function toggleAnswer(element) {
+            const content = element.querySelector('.answer-content');
+            const label = element.querySelector('p:last-of-type');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                label.innerText = "클릭하여 답변 보기 →";
+            } else {
+                content.classList.add('open');
+                label.innerText = "답변 닫기 ↑";
+            }
+        }
+
+        // Charts (Maintained Existing Logic)
         new Chart(document.getElementById('cargoChart'), {
             type: 'bar',
             data: {
-                labels: [['벨리', '공급'], ['화물기', '공급']],
+                labels: [['여객기 벨리', '(Belly)'], ['전용 화물기', '(Freighter)']],
                 datasets: [{
                     data: [18.5, -4.2],
                     backgroundColor: ['#3B82F6', '#F97316'],
-                    borderRadius: 6,
-                    barThickness: window.innerWidth < 640 ? 30 : 50
+                    borderRadius: 12,
+                    barThickness: 50
                 }]
             },
             options: {
@@ -248,23 +381,22 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: { 
-                    y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { font: { size: 10 } } },
-                    x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' } } }
+                    y: { beginAtZero: true, grid: { color: '#F1F5F9' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
 
-        // 2. Risk Radar
         new Chart(document.getElementById('riskChart'), {
             type: 'radar',
             data: {
-                labels: ['정책파편화', '공급망지연', '기후변화', '사이버위협', '거시경제'],
+                labels: ['정책 분절화', '공급망 지연', '기후 변화', '사이버 위협', '거시 경제'],
                 datasets: [{
                     data: [95, 88, 72, 85, 65],
                     backgroundColor: 'rgba(249, 115, 22, 0.2)',
                     borderColor: '#F97316',
                     pointBackgroundColor: '#F97316',
-                    borderWidth: 2
+                    borderWidth: 3
                 }]
             },
             options: {
@@ -272,62 +404,55 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: { 
-                    r: { 
-                        grid: { color: '#E2E8F0' },
-                        ticks: { display: false },
-                        pointLabels: { font: { size: 9, weight: 'bold' } }
-                    } 
+                    r: { ticks: { display: false }, pointLabels: { font: { weight: 'bold', size: 10 } } } 
                 }
             }
         });
 
-        // 3. Infra Index
         new Chart(document.getElementById('infraChart'), {
             type: 'line',
             data: {
-                labels: ['현재', '도입기', '정착기', '최적화'],
+                labels: ['도입 전', '1단계', '2단계', '최적화'],
                 datasets: [{
-                    data: [15, 45, 82, 98],
+                    data: [15, 45, 80, 98],
                     borderColor: '#3B82F6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 3
+                    pointRadius: 6,
+                    pointBackgroundColor: '#FFF',
+                    pointBorderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 10 } } } }
+                scales: { y: { display: false } }
             }
         });
 
-        // 4. Security Doughnut
         new Chart(document.getElementById('securityChart'), {
             type: 'doughnut',
             data: {
-                labels: ['피싱 & 사회공학', '랜섬웨어', '데이터 탈취', '기타'],
+                labels: ['피싱 & 사회공학', '랜섬웨어', '데이터 유출', '기타'],
                 datasets: [{
                     data: [45, 30, 20, 5],
                     backgroundColor: ['#3B82F6', '#60A5FA', '#93C5FD', '#F97316'],
                     borderWidth: 0,
-                    hoverOffset: 15
+                    hoverOffset: 25
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '65%',
-                plugins: { legend: { display: false } }
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, padding: 10 }
+                    }
+                }
             }
-        });
-
-        // Safe Event Handling (Replaces inline onclick)
-        document.querySelectorAll('.q-card').forEach(card => {
-            card.addEventListener('click', function() {
-                this.classList.toggle('card-active');
-            });
         });
     </script>
 </body>
