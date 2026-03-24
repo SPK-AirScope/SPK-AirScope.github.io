@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Swissport AirScope - 2026 March Ultimate Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #F8FAFC; -webkit-tap-highlight-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); }
+        .chart-container { position: relative; width: 100%; height: 240px; margin: 0 auto; }
+        
+        /* 타이틀 깨짐 방지 및 반응형 폰트 */
+        .keep-all { word-break: keep-all; overflow-wrap: break-word; }
+        .title-responsive { font-size: clamp(1.4rem, 5.5vw, 1.875rem); line-height: 1.3; }
+        
+        /* Interactive Answer Box */
+        .answer-box { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-active .answer-box { max-height: 400px; opacity: 1; margin-top: 1rem; }
+        .card-active .chevron-icon { transform: rotate(180deg); }
+        .chevron-icon { transition: transform 0.3s ease; }
+
+        /* Dark Section Styling */
+        .dark-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1rem; padding: 1.25rem; }
+        
+        @media (max-width: 640px) {
+            .section-padding { padding: 1.25rem; }
+            .chart-container { height: 200px; }
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased leading-relaxed">
+
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <div class="bg-white p-1 rounded shadow-inner">
+                    <img src="spk logo-NEW.jpg" alt="Swissport Logo" class="h-7 sm:h-10 object-contain" onerror="this.outerHTML='<span class=\'text-blue-900 font-black text-base px-1\'>SWISSPORT</span>'">
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-black tracking-tighter leading-none">AirScope</h1>
+                    <p class="text-[8px] sm:text-[10px] text-blue-100 uppercase tracking-widest font-bold mt-0.5">Aviation Intelligence</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] sm:text-sm font-black italic tracking-tighter">2026 MARCH</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 sm:space-y-10">
+
+        <!-- Section 1: Strategic Summary -->
+        <section class="bg-white rounded-2xl shadow-lg border-l-[6px] sm:border-l-[12px] border-orange-500 section-padding sm:p-10">
+            <h2 class="title-responsive font-black text-blue-900 mb-4 tracking-tight keep-all">핵심 요약: 불확실성 속의 전략적 대응</h2>
+            <div class="space-y-4 text-[15px] sm:text-lg text-gray-700 font-medium keep-all">
+                <p>
+                    2026년 <strong>3월</strong> 항공업계는 <strong>이란발 중동 전쟁 리스크</strong>로 인한 국제 유가 변동성과 영공 폐쇄 가능성에 기민하게 대응하고 있습니다. 
+                    급변하는 정세 속에서 <strong>정책 파편화</strong>와 공급망 지연은 운영 비용을 상승시키는 주범으로 지목됩니다.
+                </p>
+                <p class="text-gray-500 text-xs sm:text-base">
+                    특히 여객 수요 증가에 따른 <strong>여객기 벨리(Belly Cargo)</strong> 과잉 공급은 화물 운임 하락 압박을 가하고 있으며, 스마트 인프라 도입이 효율성 개선의 돌파구가 되고 있습니다.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 2: Market Analysis with Links -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
+            <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-7 border border-gray-100 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+                        <span class="w-1.5 h-4 bg-blue-600 mr-2 rounded-full"></span>여객기 벨리 공급 추이
+                    </h3>
+                    <a href="https://www.extransglobal.com/blog/extrans-global-air-freight-news-week-07-2026-cn" target="_blank" class="text-[10px] sm:text-[11px] font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded-full hover:bg-blue-50 transition">News</a>
+                </div>
+                <div class="bg-slate-50 rounded-xl p-3 flex-grow">
+                    <div class="chart-container">
+                        <canvas id="cargoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-7 border border-gray-100 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-base sm:text-xl font-bold text-gray-900 flex items-center">
+                        <span class="w-1.5 h-4 bg-orange-500 mr-2 rounded-full"></span>2026 글로벌 5대 핵심 리스크
+                    </h3>
+                    <a href="https://worldaviationfestival.com/blog/airlines/iata-reveals-the-five-key-risks-shaping-aviation-in-2026/" target="_blank" class="text-[10px] sm:text-[11px] font-bold text-orange-600 border border-orange-200 px-3 py-1 rounded-full hover:bg-orange-50 transition">IATA Report</a>
+                </div>
+                <div class="bg-slate-50 rounded-xl p-3 flex-grow">
+                    <div class="chart-container">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Smart Infrastructure with Links -->
+        <section class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 section-padding sm:p-10">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 border-gray-50 gap-4">
+                <h3 class="text-lg sm:text-2xl font-black text-blue-900">디지털 커넥트: 스마트 조업 혁신</h3>
+                <div class="flex gap-2">
+                    <a href="https://worldaviationfestival.com/blog/airports/incheon-airport-launches-remote-baggage-screening-for-us-travel/" target="_blank" class="text-[10px] sm:text-[11px] font-extrabold text-blue-600 border border-blue-100 py-1.5 px-3 rounded-lg bg-blue-50">인천공항</a>
+                    <a href="https://www.porttechnology.org/incheon-begins-work-on-first-fully-automated-terminal/" target="_blank" class="text-[10px] sm:text-[11px] font-extrabold text-orange-600 border border-orange-100 py-1.5 px-3 rounded-lg bg-orange-50">인천항</a>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-12">
+                <div class="space-y-3">
+                    <div class="p-4 bg-blue-50 rounded-xl border-l-4 border-blue-500">
+                        <h4 class="font-bold text-blue-900 text-sm sm:text-base">인천공항 원격 보안 검색</h4>
+                        <p class="text-[11px] sm:text-sm text-gray-600 mt-1">수하물 원격 점검 시스템 도입으로 환승 시간을 <strong>20분 단축</strong>합니다.</p>
+                    </div>
+                    <div class="p-4 bg-orange-50 rounded-xl border-l-4 border-orange-500">
+                        <h4 class="font-bold text-orange-900 text-sm sm:text-base">인천항 완전 자동화 터미널</h4>
+                        <p class="text-[11px] sm:text-sm text-gray-600 mt-1">무인 운반 차량(AGV) 투입으로 물류 효율의 극대화를 달성했습니다.</p>
+                    </div>
+                </div>
+                <div class="bg-slate-50 rounded-xl p-4">
+                    <p class="text-center font-black text-[9px] text-gray-400 mb-2 uppercase tracking-widest italic">Innovation Impact Index</p>
+                    <div class="chart-container h-[180px] sm:h-[220px]">
+                        <canvas id="infraChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Data Security (Restored with Link & Professional Theme) -->
+        <section class="bg-[#0F172A] rounded-2xl shadow-2xl overflow-hidden text-white section-padding sm:p-12">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-10">
+                <div>
+                    <h3 class="text-xl sm:text-2xl font-black tracking-tight">데이터 보안 인식 및 위협 분석</h3>
+                    <p class="text-blue-400 text-[10px] sm:text-sm font-medium italic mt-1">Security Focus: JAL 항공 사례 및 사이버 보안 리포트</p>
+                </div>
+                <a href="https://strobes.co/blog/top-data-breaches-of-february-2026/" target="_blank" class="text-[10px] sm:text-[11px] bg-[#E11D48] hover:bg-red-700 px-5 py-2.5 rounded-lg font-black uppercase shadow-lg transition-colors">최신 보안 리포트 (FEB 2026)</a>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <!-- Left Cards -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="dark-card">
+                        <p class="text-[10px] text-orange-400 uppercase font-black mb-2 tracking-widest">Risk Management</p>
+                        <p class="text-xs sm:text-[13px] font-medium leading-relaxed italic">"JAL 항공의 개인정보 사고는 조업 시스템의 취약점 보완을 <strong>조기 파악하여 대처</strong>해야 함을 시사합니다."</p>
+                    </div>
+                    <div class="dark-card">
+                        <p class="text-[10px] text-blue-400 uppercase font-black mb-2 tracking-widest">Operational Rule</p>
+                        <p class="text-xs sm:text-[13px] font-medium leading-relaxed">현장 기기 사용 시 불필요한 자동 로그인 기능을 해제하고 수시로 보안 점검을 수행해야 합니다.</p>
+                    </div>
+                </div>
+                
+                <!-- Right Chart Container -->
+                <div class="lg:col-span-8 bg-white/5 rounded-2xl p-4 sm:p-8 border border-white/10 flex flex-col sm:flex-row items-center gap-6">
+                    <div class="w-full sm:w-2/3 h-[250px] sm:h-[300px]">
+                        <canvas id="securityChart"></canvas>
+                    </div>
+                    <!-- Legend to match Image 2 -->
+                    <div class="w-full sm:w-1/3 flex flex-col gap-3">
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#3B82F6] rounded-sm"></span><span class="text-[10px] font-bold text-gray-300">피싱 & 사회공학</span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#60A5FA] rounded-sm"></span><span class="text-[10px] font-bold text-gray-300">랜섬웨어</span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#93C5FD] rounded-sm"></span><span class="text-[10px] font-bold text-gray-300">데이터 탈취</span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-[#F97316] rounded-sm"></span><span class="text-[10px] font-bold text-gray-300">기타</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Discussion & Feedback -->
+        <section class="bg-blue-900 rounded-2xl shadow-xl section-padding sm:p-10 text-white relative">
+            <div class="mb-8">
+                <h2 class="title-responsive font-black leading-tight">추가 탐구 과제</h2>
+                <p class="text-blue-300 font-bold text-xs sm:text-sm mt-1 uppercase tracking-wider">(Discussion & Feedback)</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white/10 backdrop-blur-md p-5 rounded-xl border border-white/20 cursor-pointer active:bg-white/20" onclick="this.classList.toggle('card-active')">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-sm sm:text-base font-black text-orange-400">데이터 보안 인식</h4>
+                        <svg class="chevron-icon w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <p class="text-[12px] sm:text-sm text-blue-50 font-medium">현장 기기 보안 수칙을 숙지하고 있습니까?</p>
+                    <div class="answer-box">
+                        <div class="bg-blue-950/60 p-3 rounded-lg border-l-4 border-orange-500 text-[11px] sm:text-[13px] text-blue-100 italic leading-snug font-medium">
+                            "비밀번호 주기적 변경과 미사용 기기의 즉각적인 로그아웃은 데이터 보안의 시작입니다."
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md p-5 rounded-xl border border-white/20 cursor-pointer active:bg-white/20" onclick="this.classList.toggle('card-active')">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-sm sm:text-base font-black text-orange-400">리스크 대응 체계</h4>
+                        <svg class="chevron-icon w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <p class="text-[12px] sm:text-sm text-blue-50 font-medium">현장에 가장 큰 영향을 줄 요소는 무엇입니까?</p>
+                    <div class="answer-box">
+                        <div class="bg-blue-950/60 p-3 rounded-lg border-l-4 border-orange-500 text-[11px] sm:text-[13px] text-blue-100 italic leading-snug font-medium">
+                            "공급망 지연 상황에서는 실시간 인력 재배치와 유연한 스케줄링 능력이 생존의 핵심입니다."
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md p-5 rounded-xl border border-white/20 cursor-pointer active:bg-white/20" onclick="this.classList.toggle('card-active')">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-sm sm:text-base font-black text-orange-400">운영 효율성 제고</h4>
+                        <svg class="chevron-icon w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <p class="text-[12px] sm:text-sm text-blue-50 font-medium">안전과 속도를 동시에 확보할 수 있습니까?</p>
+                    <div class="answer-box">
+                        <div class="bg-blue-950/60 p-3 rounded-lg border-l-4 border-orange-500 text-[11px] sm:text-[13px] text-blue-100 italic leading-snug font-medium">
+                            "태그 인식 고도화를 통해 수동 재검토를 줄여 안전과 속도를 모두 높여야 합니다."
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center py-10 text-gray-400 text-[9px] sm:text-[10px] border-t border-gray-100 px-4 leading-relaxed">
+            <p class="font-black text-gray-500 mb-1 tracking-widest uppercase">© 2026 SWISSPORT KOREA</p>
+            <p>본 자료는 임직원 교육용 내부 문서이며 무단 배포를 금합니다.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+        Chart.defaults.color = '#94A3B8';
+
+        // 1. Cargo Chart
+        new Chart(document.getElementById('cargoChart'), {
+            type: 'bar',
+            data: {
+                labels: [['벨리', '공급'], ['화물기', '공급']],
+                datasets: [{
+                    data: [18.5, -4.2],
+                    backgroundColor: ['#3B82F6', '#F97316'],
+                    borderRadius: 6,
+                    barThickness: window.innerWidth < 640 ? 30 : 50
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' } } }
+                }
+            }
+        });
+
+        // 2. Risk Radar
+        new Chart(document.getElementById('riskChart'), {
+            type: 'radar',
+            data: {
+                labels: ['정책파편화', '공급망지연', '기후변화', '사이버위협', '거시경제'],
+                datasets: [{
+                    data: [95, 88, 72, 85, 65],
+                    backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                    borderColor: '#F97316',
+                    pointBackgroundColor: '#F97316',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { 
+                    r: { 
+                        grid: { color: '#E2E8F0' },
+                        ticks: { display: false },
+                        pointLabels: { font: { size: 9, weight: 'bold' } }
+                    } 
+                }
+            }
+        });
+
+        // 3. Infra Index (Step: 현재)
+        new Chart(document.getElementById('infraChart'), {
+            type: 'line',
+            data: {
+                labels: ['현재', '도입기', '정착기', '최적화'],
+                datasets: [{
+                    data: [15, 45, 82, 98],
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 10 } } } }
+            }
+        });
+
+        // 4. Security Doughnut (Customized Styling)
+        new Chart(document.getElementById('securityChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['피싱 & 사회공학', '랜섬웨어', '데이터 탈취', '기타'],
+                datasets: [{
+                    data: [45, 30, 20, 5],
+                    backgroundColor: ['#3B82F6', '#60A5FA', '#93C5FD', '#F97316'],
+                    borderWidth: 0,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
