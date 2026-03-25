@@ -133,8 +133,8 @@
             <h2 class="text-3xl font-black text-blue-900 mb-6">핵심 요약: 불확실성 속의 전략적 대응</h2>
             <div class="space-y-4 text-lg text-gray-600 leading-relaxed font-medium">
                 <p>
-                    2026년 항공업계는 <strong>이란발 중동 전쟁 리스크</strong>로 인한 국제 유가 변동성과 영공 폐쇄 가능성에 기민하게 대응하고 있습니다. 
-                    급변하는 정세 속에서 정책 분절화와 공급망 지연은 운영 비용을 상승시키는 주범으로 지목됩니다.
+                    2026년 3월 항공업계는 <strong>이란발 중동 전쟁 리스크</strong>로 인한 국제 유가 변동성과 영공 폐쇄 가능성에 기민하게 대응하고 있습니다. 
+                    급변하는 정세 속에서 정책 파편화와 공급망 지연은 운영 비용을 상승시키는 주범으로 지목됩니다.
                 </p>
                 <p>
                     특히 여객 수요 증가에 따른 <strong>여객기 벨리(Belly Cargo)</strong> 과잉 공급은 화물 운임 하락 압박을 가하고 있으며, 
@@ -156,7 +156,7 @@
                         <canvas id="cargoChart"></canvas>
                     </div>
                 </div>
-                <p class="mt-4 text-xs text-gray-500 font-medium italic">*여객 노선 정상화로 인한 하부 화물칸(Belly) 공급 급증 반영</p>
+                <p class="mt-4 text-xs text-gray-500 font-medium italic">*여객 노선 정상화로 인한 하부 화물칸(Belly Cargo) 공급 급증 반영</p>
             </div>
 
             <div class="bg-white rounded-2xl shadow-md p-6 stat-card border border-gray-100">
@@ -170,7 +170,7 @@
                         <canvas id="riskChart"></canvas>
                     </div>
                 </div>
-                <p class="mt-4 text-xs text-gray-500 font-medium italic">*IATA 선정: 정책 분절화가 업계 수익률(3.9%)을 위협하는 최대 요인</p>
+                <p class="mt-4 text-xs text-gray-500 font-medium italic">*IATA 선정: 정책 비일관성이 업계 수익률(3.9%)을 위협하는 최대 요인</p>
             </div>
         </div>
 
@@ -192,7 +192,7 @@
                         </div>
                         <div class="p-6 bg-orange-50 rounded-2xl border-l-4 border-orange-500">
                             <h4 class="font-black text-orange-900 mb-2">인천항: 국내 최초 완전 자동화 터미널</h4>
-                            <p class="text-sm text-gray-600">무인 운반 차량(AGV)과 자동화 크레인이 투입된 사례로, 공항 보안과는 별개의 항만 물류 처리 혁신 프로젝트입니다.</p>
+                            <p class="text-sm text-gray-600">무인 운반 차량(AGV)과 자동화 크레인이 투입된 사례로, 항만 물류 처리 혁신 프로젝트입니다.</p>
                         </div>
                     </div>
                     <div class="bg-slate-50 rounded-2xl p-6">
@@ -369,7 +369,7 @@
         new Chart(document.getElementById('cargoChart'), {
             type: 'bar',
             data: {
-                labels: [['여객기 벨리', '(Belly)'], ['전용 화물기', '(Freighter)']],
+                labels: [['여객기 벨리', '(Belly Cargo)'], ['전용 화물기', '(Freighter)']],
                 datasets: [{
                     data: [18.5, -4.2],
                     backgroundColor: ['#3B82F6', '#F97316'],
@@ -391,7 +391,7 @@
         new Chart(document.getElementById('riskChart'), {
             type: 'radar',
             data: {
-                labels: ['정책 분절화', '공급망 지연', '기후 변화', '사이버 위협', '거시 경제'],
+                labels: ['정책 파편화', '공급망 지연', '기후 변화', '사이버 위협', '거시 경제'],
                 datasets: [{
                     data: [95, 88, 72, 85, 65],
                     backgroundColor: 'rgba(249, 115, 22, 0.2)',
@@ -436,7 +436,7 @@
         new Chart(document.getElementById('securityChart'), {
             type: 'doughnut',
             data: {
-                labels: ['피싱 & 사회공학', '랜섬웨어', '데이터 유출', '기타'],
+                labels: ['피싱 & 사회공학적 공격', '랜섬웨어', '데이터 유출', '기타'],
                 datasets: [{
                     data: [45, 30, 20, 5],
                     backgroundColor: ['#3B82F6', '#60A5FA', '#93C5FD', '#F97316'],
