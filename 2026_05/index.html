@@ -1,1 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Swissport AirScope - 2026년 5월 글로벌 항공보안 및 산업 동향</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #F8FAFC; -webkit-tap-highlight-color: transparent; }
+        .chart-container { position: relative; width: 100%; height: 240px; }
+        @media (max-width: 640px) { .chart-container { height: 200px; } }
+        .stat-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08); }
+        
+        /* Smooth Accordion Panels */
+        .answer-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+        }
+        .answer-content.open {
+            max-height: 1200px;
+            opacity: 1;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased bg-slate-50/50 pb-12">
 
+    <div class="sticky top-0 z-50 w-full bg-slate-900/95 backdrop-blur-md border-b border-white/10 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 flex-grow max-w-xl">
+                <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-950/60 px-2 py-0.5 rounded border border-orange-900/50 whitespace-nowrap">AI Briefing</span>
+                <button id="playBtn" class="bg-white/10 p-2 rounded-full hover:bg-white/20 hover:scale-105 transition-all active:scale-95 flex-shrink-0">
+                    <svg id="playIcon" class="w-4 h-4 fill-current text-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIcon" class="w-4 h-4 fill-current text-white hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <div class="flex-grow height-[6px] bg-white/20 rounded-full cursor-pointer relative py-2" id="progressContainer">
+                    <div class="absolute top-1/2 left-0 -translate-y-1/2 h-1.5 bg-red-500 rounded-full w-0" id="progressBar"></div>
+                </div>
+                <span id="currentTime" class="text-[10px] font-mono text-slate-300 w-8 text-right flex-shrink-0">0:00</span>
+            </div>
+
+            <div class="bg-gradient-to-r from-orange-500 to-red-600 px-3 py-1 rounded-lg shadow-md flex-shrink-0">
+                <span class="text-white font-black text-xs tracking-widest">2026 MAY</span>
+            </div>
+        </div>
+        <audio id="podcastAudio">
+            <source src="5.m4a" type="audio/mp4">
+        </audio>
+    </div>
+
+    <header class="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 bg-white sm:bg-transparent">
+        <div class="flex items-center space-x-3">
+            <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex-shrink-0">
+                <img src="spkLogoNEW.jpg" alt="Swissport Logo" class="h-10 object-contain" onerror="this.outerHTML='<span class=\'text-blue-900 font-black text-xl tracking-tighter px-2\'>SWISSPORT</span>'">
+            </div>
+            <div>
+                <h1 class="text-2xl font-black tracking-tighter text-slate-900 flex items-center gap-2">
+                    AirScope <span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-200">Internal Use Only</span>
+                </h1>
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-0.5">Global Aviation Security &amp; Industrial Intelligence</p>
+            </div>
+        </div>
+        <div class="sm:text-right w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 flex sm:flex-col justify-between items-center sm:items-end">
+            <p class="text-xs text-slate-400 font-medium">Issue No. 2026-05</p>
+            <p class="text-xs font-bold text-slate-600">Swissport Korea 총무보안팀</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-8">
+
+        <section class="bg-white rounded-2xl shadow-sm p-5 sm:p-8 border-l-[8px] sm:border-l-[12px] border-blue-950">
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-4 flex items-center gap-2">
+                <span class="text-blue-900 text-lg sm:text-xl">■</span> 핵심요약: 항공산업 불확실성 확대 속 공공-민간 협력 강화
+            </h2>
+            <div class="space-y-4 text-base text-slate-600 leading-relaxed font-medium">
+                <p>
+                    2026년 5월 글로벌 항공 시장은 팬데믹의 긴 터널을 지나 전례 없는 여객 수요 급증을 맞이하고 있습니다.
+                    <strong>그러나 이스라엘-이란 분쟁 격화로 배럴당 100달러 선을 압박하는 유가 급등</strong>과 핵심 원유 수송로인 <strong>호르무즈 해협의 사실상 통제</strong>로 인해 복합적인 연료 위기가 발생하고 있습니다.
+                </p>
+                <p>
+                    이러한 재정적 압박 속에서 미국 연방교통안전청(TSA)은 정부 셧다운에 따른 보안 공백에 대비하기 위한 민간 위탁 보안 모델인 <strong>'TSA Gold+' 프로그램</strong>을 전격 공개하며 큰 안보 논쟁을 촉발했습니다. 
+                    아울러, <strong>스키폴 국제공항의 보안 전환 실패 사례</strong>와 <strong>인천국제공항의 기내 9cm 과도 반입 적발 사건</strong>은 과도기적 항공 현장에서 발생할 수 있는 보안 사각지대와 급진적 아웃소싱 체계의 리스크를 여실히 보여주고 있습니다.
+                </p>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6 stat-card border border-slate-200/60 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4 gap-2">
+                        <span class="text-[11px] font-bold text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">Financial Index</span>
+                        <a href="https://kr.investing.com/news/stock-market-news/article-93CH-1953610" target="_blank" class="text-[11px] font-bold text-blue-700 hover:text-blue-900 border border-slate-200 bg-slate-50 px-2.5 py-1 rounded-md transition-colors whitespace-nowrap">수용량 감소 예상 ↗</a>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-black text-slate-900">물가 지수 급등세 및 조업 원가 압박</h3>
+                    <p class="text-xs text-slate-400 mt-1 mb-4 font-medium">항공 소비자물가지수(CPI) 전년동기 대비 폭등 추이</p>
+                    <div class="bg-slate-50 rounded-xl p-2 sm:p-4">
+                        <div class="chart-container">
+                            <canvas id="financialChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-blue-50/50 rounded-xl border border-blue-100/60">
+                    <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                        💡 <strong class="text-blue-950">실무 영향:</strong> CPI가 20.7% 폭등하고 여객 생산자지수(PPI)가 11.1%에 상하하는 조업원가 압박이 축적되고 있습니다. 유류할증료 증가와 운임 인상이 기정사실화되고 있습니다.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6 stat-card border border-slate-200/60 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4 gap-2">
+                        <span class="text-[11px] font-bold text-orange-900 bg-orange-50 px-2.5 py-1 rounded-md border border-orange-100">Capacity Adjustments</span>
+                        <a href="https://www.theguardian.com/world/2026/may/14/inevitable-jet-fuel-shortages-will-drive-up-air-fares-this-summer-says-willie-walsh" target="_blank" class="text-[11px] font-bold text-orange-700 hover:text-orange-900 border border-slate-200 bg-slate-50 px-2.5 py-1 rounded-md transition-colors whitespace-nowrap">운임 폭등이 "불가피" ↗</a>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-black text-slate-900">미국 주요 항공사 공급망 및 좌석 조정</h3>
+                    <p class="text-xs text-slate-400 mt-1 mb-4 font-medium">유가 충격에 대비한 3분기 항공 공급량(Capacity) 긴축</p>
+                    <div class="bg-slate-50 rounded-xl p-2 sm:p-4">
+                        <div class="chart-container">
+                            <canvas id="capacityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-orange-50/50 rounded-xl border border-orange-100/60">
+                    <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                        💡 <strong class="text-orange-950">실무 영향:</strong> 스피릿 항공의 대규모 운항 중단 및 유나이티드 항공의 수용량 증가율 대폭 하향(9.4% → 5.2%) 조치는 대대적인 지상 조업 스케줄 변동성을 유발합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+            <div class="p-5 sm:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4 mb-6 border-slate-100">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-black text-slate-900">미국 TSA 'Gold+' 및 글로벌 여행 규정 전면화</h3>
+                        <p class="text-xs text-slate-400 mt-0.5 font-medium">공공 안보의 민간 이양 논란과 신원 인증 장벽 강화</p>
+                    </div>
+                    <a href="https://www.travelmarketreport.com/air/articles/tsa-unveils-gold-program-in-major-shift-toward-private-airport-security" target="_blank" class="text-[11px] font-bold text-slate-700 hover:text-slate-900 border border-slate-200 bg-slate-50 px-3 py-1.5 rounded-md transition-colors whitespace-nowrap self-end sm:self-auto">TSA Gold+ 원문 ↗</a>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="space-y-4 lg:col-span-2">
+                        <div class="p-4 sm:p-5 bg-slate-50 rounded-xl border-l-4 border-blue-800">
+                            <h4 class="font-extrabold text-blue-900 text-base mb-1.5">TSA Gold+ 도입 요체</h4>
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                                사기업이 직접 3D 정밀 스캐너의 자금 조달과 운영을 수행할 수 있도록 허용하는 혁신 법안입니다. 
+                                연방정부 셧다운 발생 시 약 6만 명의 검색 요원이 급여를 받지 못해 보안 체계가 마비되는 상황을 방지하고, 
+                                보안 장비 도입 과정의 관료주의를 해소하기 위한 취지입니다. 그러나 공무원 노조의 대대적인 반대에 직면해 있습니다.
+                            </p>
+                        </div>
+                        <div class="p-4 sm:p-5 bg-slate-50 rounded-xl border-l-4 border-orange-600">
+                            <h4 class="font-extrabold text-orange-900 text-base mb-1.5">REAL ID 단속 & ETIAS 전면 가동</h4>
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                                2026년 2월 1일부터 REAL ID 기준을 충족하지 못한 주정부 발급 신분증 소지자에 대해 탑승 거절 및 대체 확인 수수료(45달러) 부과가 시행되었습니다.
+                                유럽연합(EU) 역시 미국 등 제3국 대상 ETIAS 사전 여행 전자승인 제도를 강화하면서, 체크인 카운터 지상조업 요원의 시스템 자동 스캔 및 신원 확인 정확성이 더욱 중요해지고 있습니다.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-50 rounded-xl p-4 flex flex-col justify-center items-center">
+                        <h4 class="font-bold text-slate-700 mb-3 text-xs uppercase tracking-wider">IT 및 예방정비 최우선순위 지표</h4>
+                        <div class="chart-container !h-[180px]">
+                            <canvas id="futureAviationChart"></canvas>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-3 text-center font-semibold italic leading-snug">DLA Piper 설문: 고위 항공 임원의 98%가 기술 및 IT 투자에 집중</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-slate-900 rounded-2xl shadow-md overflow-hidden text-white">
+            <div class="p-5 sm:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-white/10 pb-4">
+                    <div>
+                        <span class="text-[10px] text-orange-400 font-black tracking-wider uppercase bg-orange-950/80 border border-orange-900/50 px-2 py-0.5 rounded">Critical Case Study</span>
+                        <h3 class="text-lg sm:text-xl font-black mt-1.5">과도기적 보안 운영 실패 사례 분석</h3>
+                        <p class="text-slate-400 text-xs font-medium mt-0.5">스키폴 공항 인력 마비 및 인천공항 위해물품 침투 실패 대책</p>
+                    </div>
+                    <a href="https://www.donga.com/news/Society/article/all/20260518/133947348/1" target="_blank" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-black text-xs transition-colors shadow-sm self-end sm:self-auto whitespace-nowrap">기내 식칼 반입 기사 ↗</a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white/5 p-5 rounded-xl border border-white/10 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="bg-red-950/60 text-red-400 text-[10px] font-black tracking-wide px-2 py-0.5 rounded border border-red-900/40">Amsterdam (AMS)</span>
+                                <span class="text-xs text-slate-400 font-bold">5월 18일</span>
+                            </div>
+                            <h4 class="text-base sm:text-lg font-black text-white mb-1.5">스키폴 공항 아웃소싱 운영 마비</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                비현실적인 ‘최저가 단가 경쟁(13% 인하)’으로 인해 노조의 대규모 단체 병가 파업이 발생한 가운데, 신규 투입된 보안 요원들의 출입제한구역(Airside) 모바일 바코드 시스템에서 대규모 오류가 발생하며 공항 운영이 수일간 사실상 마비되었습니다. 이로 인해 약 6만 8천 명의 승객 수속이 연쇄적으로 차질을 빚었습니다.
+                            </p>
+                        </div>
+                        <div class="text-xs text-orange-300 font-bold border-t border-white/15 pt-3">
+                            ✔ 교훈: 기계·시스템 전환 전 시뮬레이션 기간(Shadow Run) 운영 필수
+                        </div>
+                    </div>
+
+                    <div class="bg-white/5 p-5 rounded-xl border border-white/10 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="bg-red-950/60 text-red-400 text-[10px] font-black tracking-wide px-2 py-0.5 rounded border border-red-900/40">Incheon (ICN)</span>
+                                <span class="text-xs text-slate-400 font-bold">5월 17일</span>
+                            </div>
+                            <h4 class="text-base sm:text-lg font-black text-white mb-1.5">기내 식칼 반입 및 X-ray 판독 실패</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                아부다비행 탑승객의 자진 신고로 드러난 ‘9cm 주방용 과도’ 반입 사건입니다. X-ray 판독 요원의 검색 집중력 저하로 인해 위협 물질 검출 체계에 심각한 허점이 발생했으며, 이에 따라 국토교통부는 고강도 특별감사에 착수했습니다.
+                            </p>
+                        </div>
+                        <div class="text-xs text-orange-300 font-bold border-t border-white/15 pt-3">
+                            ✔ 교훈: 조업 요원 및 탑승 절차 전반에 대한 ‘다중 검증 체계’ 확보 시급
+                        </div>
+                    </div>
+
+                    <div class="bg-white/5 rounded-xl p-4 border border-white/10 flex flex-col justify-center items-center md:col-span-2 lg:col-span-1">
+                        <h4 class="font-bold text-slate-300 mb-3 text-xs uppercase tracking-wider">보안 이슈 비율</h4>
+                        <div class="chart-container !h-[180px]">
+                            <canvas id="securityFailureChart"></canvas>
+                        </div>
+                        <p class="text-[10px] text-slate-400 text-center font-medium italic mt-3 leading-snug">X-Ray 판독 의존도 증가 및 외주 전환 과정에서의 전산 테스트 검증 미흡 요인</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+            <div class="bg-blue-950 px-5 py-5 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-lg sm:text-xl font-black">대한항공-아시아나 통합 공식 출범 및 운항체계 통합 가속</h3>
+                    <p class="text-xs text-blue-300 font-medium mt-0.5">2026년 12월 17일 출범 확정 및 법적 합병 타임라인</p>
+                </div>
+                <a href="https://www.yna.co.kr/view/AKR20260513148400003" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1.5 rounded-lg text-xs font-black transition-all whitespace-nowrap self-end sm:self-auto">대한항공 아시아나 합병 뉴스 ↗</a>
+            </div>
+            <div class="p-5 sm:p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                        <span class="text-blue-800 text-[10px] font-black uppercase tracking-wider">AOC &amp; OpSpecs</span>
+                        <h4 class="text-base font-extrabold text-slate-900 mt-1 mb-1.5">운항증명 일원화 규정</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                            아시아나항공의 기재,엔진,운항 통제 체계를 대한항공 운영 기준으로 통합하는 절차가 오는 6월부터 본격 추진될 예정입니다. 이에 따라 정비 표준의 일원화와 표준 안전 매뉴얼(SOP) 개편이 주요 과제로 부각되고 있으며, 양사 간 운항,정비 체계의 안정적 통합 여부가 핵심 이슈로 평가됩니다.
+                        </p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                        <span class="text-blue-800 text-[10px] font-black uppercase tracking-wider">Mileage Settlement</span>
+                        <h4 class="text-base font-extrabold text-slate-900 mt-1 mb-1.5">마일리지 최종 교환율</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                            순수 탑승 마일리지는 기존과 동일하게 1:1 비율의 완전 정산이 보장됩니다. 반면, 카드 제휴 전환 포인트 기반 마일리지는 1:0.82 비율로 조정되는 가치 환산 체계가 도입되며, 이에 따른 이용자 반발을 최소화하기 위해 10년의 유예 기간이 적용될 예정입니다.
+                        </p>
+                    </div>
+                    <div class="bg-orange-50/60 p-4 rounded-xl border border-orange-100">
+                        <span class="text-orange-800 text-[10px] font-black uppercase tracking-wider">LCC Hardship</span>
+                        <h4 class="text-base font-extrabold text-orange-950 mt-1 mb-1.5">LCC 군단 구조적 위기</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                            고유가 및 조업 단가 상향으로 티웨이(5~6월), 제주항공(6월), 에어로케이(5월)가 줄줄이 직원 무급 휴직에 돌입하며 고용노동부 특별 경보가 내려지는 등 시장 이중화가 극에 달했습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-gradient-to-br from-slate-900 to-blue-950 rounded-2xl shadow-md p-5 sm:p-8 text-white">
+            <h2 class="text-xl sm:text-2xl font-black mb-1 flex items-center gap-2">
+                <span class="text-orange-400">💡</span> 5월 사내 정규 전파 교육 및 비즈니스 토론 과제
+            </h2>
+            <p class="text-xs text-blue-300 font-medium mb-6">Swissport Korea 지상조업 및 공항지상 안전요원을 위한 정규 실무 트레이닝 가이드</p>
+            
+            <div class="space-y-4">
+                <div class="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-4 sm:p-5 transition-all duration-200 cursor-pointer group" onclick="toggleAnswer(this)">
+                    <div class="flex justify-between items-start gap-4">
+                        <h4 class="text-sm sm:text-base font-black text-orange-400 group-hover:text-white transition-colors leading-snug">
+                            Q1. 인천공항 보안 검색 침투 실패에 따른 '지상조업 요원 다중 교차 검증' 방안
+                        </h4>
+                        <span class="toggle-status text-[10px] font-bold text-slate-400 bg-white/5 px-2 py-0.5 rounded-full group-hover:text-white whitespace-nowrap">열기 ↓</span>
+                    </div>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed font-medium">
+                        공항 당국의 보안 체크포인트 단 하나에만 조업 프로세스 무결성을 온전히 의존할 수 없는 실무적 환경에서, 수속 카운터 및 기내 진입 전 게이트에서 당사 요원들이 취해야 할 크로스체크 프로세스는 무엇입니까?
+                    </p>
+                    <div class="answer-content">
+                        <div class="p-4 bg-slate-950/40 rounded-xl border border-white/5 text-xs sm:text-sm text-slate-200 leading-relaxed space-y-3 font-medium">
+                            <p class="font-black text-orange-400">💡 스위스포트 추천 실무 지침 (Recommended Response)</p>
+                            <ul class="list-disc list-inside space-y-2 text-xs sm:text-sm text-slate-300">
+                                <li><strong class="text-white">승객 실물 대조 강화:</strong> 여권 및 탑승권 확인 시 단순 이름 확인이 아닌, 얼굴 실물 대조, 모자·마스크·선글라스 제거 요청, 성별·연령대·국적 정보 간 불일치 여부 확인, 식별이 어려운 경우 Supervisor 호출 후 추가 확인 실시</li>
+                                <li><strong class="text-white">Gate Bag(게이트 위탁 수하물) 동의 절차 강화:</strong> 기내 진입 전 탑승교(Gate) 현장에서 기내 반입 기준 초과로 즉석 Gate Bag 처리 진행 시, 단순 구두 확인에 그치지 않고 위해 물질 및 고용량 보조배터리 포함 여부를 승객이 직접 확인·서명하는 <span class="underline decoration-orange-400 decoration-2">‘자기 검증 확인서(Self-Verification Form)’ 작성 절차를 의무화</span>합니다.</li>
+                                <li><strong class="text-white">에어사이드 무작위 교차 확인 절차 운영:</strong> 에어사이드 제한구역 출입 시, 아웃소싱 인력 및 지상조업 인력을 대상으로 내부 상호 출입증 확인 절차를 시범 운영하여 현장 보안 집중력 저하로 발생할 수 있는 사각지대를 다중 확인 체계로 보완합니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-4 sm:p-5 transition-all duration-200 cursor-pointer group" onclick="toggleAnswer(this)">
+                    <div class="flex justify-between items-start gap-4">
+                        <h4 class="text-sm sm:text-base font-black text-orange-400 group-hover:text-white transition-colors leading-snug">
+                            Q2. 스키폴 공항 아웃소싱 대혼란 등에 대비하기 위한 ‘지상조업 전환기 비즈니스 연속성 계획(BCP)’ 설계 요건
+                        </h4>
+                        <span class="toggle-status text-[10px] font-bold text-slate-400 bg-white/5 px-2 py-0.5 rounded-full group-hover:text-white whitespace-nowrap">열기 ↓</span>
+                    </div>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed font-medium">
+                        향후 국적 대형 항공사 합병 등에 따른 조업 주계약 변경 또는 대규모 조업 계약 승계 과정에서, 노사 갈등 및 IT 시스템 연계 오류 등으로 발생할 수 있는 운영 차질을 최소화하기 위해 필요한 BCP(비즈니스 연속성 계획) 기반의 실무 대응 체계에는 어떤 요소가 포함되어야 합니까?
+                    </p>
+                    <div class="answer-content">
+                        <div class="p-4 bg-slate-950/40 rounded-xl border border-white/5 text-xs sm:text-sm text-slate-200 leading-relaxed space-y-3 font-medium">
+                            <p class="font-black text-orange-400">💡 스위스포트 추천 실무 지침 (Recommended Response)</p>
+                            <ul class="list-disc list-inside space-y-2 text-xs sm:text-sm text-slate-300">
+                                <li><strong class="text-white">Dual Operation(이중 운영) 기간 확보:</strong> 전환 초기 일정 기간 동안 기존 조업 체계와 신규 체계를 병행 운영하고, 주요 운항편은 이중 승인 및 교차 모니터링 체계를 유지해야 합니다. 특히, Load Control 탑승 및 수하물 처리 Ramp Safety 관리 항목은 즉시 단절 없이 유지되어야 합니다.</li>
+                                <li><strong class="text-white">현장 의사결정 단순화:</strong> 대규모 혼란 상황에서는 복잡한 승인 체계가 오히려 장애를 확대시킬 수 있습니다. 따라서 현장 책임자 권한 확대, 비상 승인 간소화, 단일 상황 통제센터(Command Center) 운영, 실시간 상황 공유 체계 구축이 필요합니다.</li>
+                                <li><strong class="text-white">정예 임시 교대조(TOC Contingency Force) 상주:</strong> 조업 전환 초기 일주일 동안은 예기치 못한 병목 및 결손 상황에 대비하기 위해, 본사 수석 안전관 및 특수 지상지원장비(GSE) 조작 마스터로 구성된 비상조를 현장 교대 인력 대비 15% 이상 추가 예비 배치합니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-4 sm:p-5 transition-all duration-200 cursor-pointer group" onclick="toggleAnswer(this)">
+                    <div class="flex justify-between items-start gap-4">
+                        <h4 class="text-sm sm:text-base font-black text-orange-400 group-hover:text-white transition-colors leading-snug">
+                            Q3. 미 TSA 'Gold+' 프로그램 확산에 부합하는 사내 보안 엔지니어 인재상 정립 요구안
+                        </h4>
+                        <span class="toggle-status text-[10px] font-bold text-slate-400 bg-white/5 px-2 py-0.5 rounded-full group-hover:text-white whitespace-nowrap">열기 ↓</span>
+                    </div>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed font-medium">
+                        보안 장비 자체를 민간 기업이 전적으로 운영 및 조달하는 TSA Gold+ 패러다임은 글로벌 조업 인프라의 질적 성장을 더욱 가속화하고 있습니다. 이에 발맞춰 지상조업 요원의 핵심 역량 모델은 어떠한 방향으로 변화해야 하는가?
+                    </p>
+                    <div class="answer-content">
+                        <div class="p-4 bg-slate-950/40 rounded-xl border border-white/5 text-xs sm:text-sm text-slate-200 leading-relaxed space-y-3 font-medium">
+                            <p class="font-black text-orange-400">💡 스위스포트 추천 실무 지침 (Recommended Response)</p>
+                            <ul class="list-disc list-inside space-y-2 text-xs sm:text-sm text-slate-300">
+                                <li><strong class="text-white">다기능(Multi-Skill) 현장 대응 인재 육성:</strong> 보안·조업·안전 업무를 복합적으로 이해하는 다기능형 인재 수요가 확대되고 있습니다. 현장에서는 단일 업무 수행보다 다양한 상황에 즉시 대응 가능한 역량이 중요합니다. 이를 위한 실무 중심 교차 교육 체계 구축이 필요합니다.</li>
+                                <li><strong class="text-white">‘조업 인력’에서 ‘보안 파트너’로 역할 확대:</strong> 공항 보안은 특정 부서가 아닌 모든 운영 인력이 함께 수행하는 영역으로 변화하고 있습니다. 지상조업 요원도 잠재 위험을 사전에 식별하고 즉시 공유하는 역할이 요구됩니다. 현장 중심의 책임 의식과 보고 문화 정착이 더욱 중요해질 것으로 예상됩니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center pt-8 pb-4 text-[10px] border-t border-slate-200 text-slate-400">
+            <p class="font-bold text-slate-500 mb-1 tracking-widest uppercase">© 2026 SWISSPORT KOREA - CONFIDENTIAL CO-TRAINING DOCUMENT</p>
+            <p class="mb-0.5 max-w-2xl mx-auto px-4 leading-normal">본 문서는 에어사이드 보안 지침 준수 및 임직원 소양 함양을 목적으로 당사 교육개발팀에서 전사 발간한 대외비 스마트 연수 교안입니다.</p>
+            <p>비승인 무단 복제 및 타 조업사 전재를 엄격히 금합니다.</p>
+        </footer>
+    </main>
+
+    <script>
+        // Smoothly Toggle Discussion Answers & Change Status UI
+        function toggleAnswer(element) {
+            const content = element.querySelector('.answer-content');
+            const statusTag = element.querySelector('.toggle-status');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                statusTag.innerText = "열기 ↓";
+                statusTag.classList.remove('bg-orange-500', 'text-white');
+                statusTag.classList.add('bg-white/5', 'text-slate-400');
+            } else {
+                content.classList.add('open');
+                statusTag.innerText = "닫기 ↑";
+                statusTag.classList.remove('bg-white/5', 'text-slate-400');
+                statusTag.classList.add('bg-orange-500', 'text-white');
+            }
+        }
+
+        // Custom Top Podcast Audio Player Logic
+        const audio = document.getElementById('podcastAudio');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+
+        audio.onerror = () => { 
+            console.warn("May Podcast brief file (5.m4a) not found on path. Running visual interfaces only."); 
+        };
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (audio.paused) {
+                audio.play().catch(err => {
+                    console.log("Audio playback was blocked or file doesn't exist yet.");
+                });
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                audio.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${percent}%`;
+            currentTimeEl.innerText = formatTime(audio.currentTime);
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickPos = (e.clientX - rect.left) / rect.width;
+            if (isFinite(audio.duration)) {
+                audio.currentTime = clickPos * audio.duration;
+            }
+        });
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // --- CHARTS INJECTIONS (Optimized for Mobile/Web Responsive layouts) ---
+
+        // Chart 1: Financial Multi-Index
+        new Chart(document.getElementById('financialChart'), {
+            type: 'line',
+            data: {
+                labels: ['12월', '1월', '2월', '3월', '4월(최근)'],
+                datasets: [
+                    {
+                        label: '항공 소비자물가(CPI) %',
+                        data: [10.2, 12.4, 13.1, 14.9, 20.7],
+                        borderColor: '#EF4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                        fill: true,
+                        tension: 0.35,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: '여객 서비스 생산자물가(PPI) %',
+                        data: [6.1, 7.3, 8.9, 9.5, 11.1],
+                        borderColor: '#2563EB',
+                        backgroundColor: 'transparent',
+                        fill: false,
+                        tension: 0.35,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'top', 
+                        labels: { boxWidth: 10, padding: 8, font: { weight: 'bold', size: 10 } } 
+                    } 
+                },
+                scales: {
+                    y: { type: 'linear', position: 'left', grid: { color: '#E2E8F0' }, ticks: { font: { size: 9 }, callback: value => value + '%' } },
+                    y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { font: { size: 9 }, callback: value => value + '%' } }
+                }
+            }
+        });
+
+        // Chart 2: Capacity Downsizing
+        new Chart(document.getElementById('capacityChart'), {
+            type: 'bar',
+            data: {
+                labels: ['스피릿 항공', '유나이티드 항공', '아메리칸 항공'],
+                datasets: [
+                    {
+                        label: '기존 수용성 계획 %',
+                        data: [12.0, 9.4, 9.3],
+                        backgroundColor: '#64748B',
+                        borderRadius: 4
+                    },
+                    {
+                        label: '수정 3분기 계획 %',
+                        data: [0.0, 5.2, 9.3],
+                        backgroundColor: '#F97316',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'top', 
+                        labels: { boxWidth: 10, padding: 8, font: { weight: 'bold', size: 10 } } 
+                    } 
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#E2E8F0' }, ticks: { font: { size: 9 }, callback: value => value + '%' } },
+                    x: { ticks: { font: { size: 10, weight: 'bold' } } }
+                }
+            }
+        });
+
+        // Chart 3: Innovation Target Index
+        new Chart(document.getElementById('futureAviationChart'), {
+            type: 'radar',
+            data: {
+                labels: ['AI 정비', 'IT&신기술', 'SAF 환경', '인프라확충'],
+                datasets: [{
+                    label: '고위 임원 응답 비율 (%)',
+                    data: [90, 98, 88, 75],
+                    backgroundColor: 'rgba(37, 99, 235, 0.15)',
+                    borderColor: '#2563EB',
+                    pointBackgroundColor: '#1D4ED8',
+                    borderWidth: 1.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    r: { min: 0, max: 100, ticks: { display: false }, pointLabels: { font: { size: 9, weight: 'bold' } } }
+                }
+            }
+        });
+
+        // Chart 4: Security Failure Metrics
+        new Chart(document.getElementById('securityFailureChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['X-ray 판독 결함', '외주 노사 리스크', '시스템 미동기', '장비 결함 에러'],
+                datasets: [{
+                    data: [45, 30, 15, 10],
+                    backgroundColor: ['#EF4444', '#F97316', '#3B82F6', '#94A3B8'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { 
+                            color: '#E2E8F0', 
+                            font: { size: 9, weight: 'bold' }, 
+                            padding: 6,
+                            boxWidth: 10
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
