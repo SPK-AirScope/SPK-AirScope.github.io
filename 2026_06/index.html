@@ -619,7 +619,7 @@
             </p>
         </footer>
 
-    </main>
+</main>
 
     <script>
         // Tab switching logic
@@ -670,12 +670,13 @@
             document.getElementById('chosenValueSpan').innerText = `"${feedbackValue}"`;
         }
 
+        // reset feedback
         function resetVolatileFeedback() {
             document.getElementById('surveySuccessBox').classList.add('hidden');
             document.getElementById('surveyMainBox').classList.remove('hidden');
         }
 
-        // Interactive Audio Brief simulator
+        // 🛠️ Interactive Audio Brief Controller (가짜 시뮬레이터 제거 -> 실제 오디오 완전 연동 버전)
         const audioBtn = document.getElementById('podcastPlayBtn');
         const playSvg = document.getElementById('playSvg');
         const pauseSvg = document.getElementById('pauseSvg');
@@ -684,16 +685,40 @@
         const audioTimer = document.getElementById('audioTimer');
         const realAudio = document.getElementById('realPodcastAudio');
         
-        let playInterval;
         let isPlaying = false;
-        let audioSec = 0;
-        const totalDuration = 270; // 4 minute 30 seconds audio simulation fallback
+        const defaultDuration = 270; // 4분 30초 오디오가 안 읽힐 때를 대비한 기본 초값
+
+        // 초 단위를 00:00 형태로 포맷팅하는 함수
+        function formatTime(seconds) {
+            if (isNaN(seconds) || seconds === Infinity) return "00:00";
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+        }
 
         // Safe loader log
         realAudio.addEventListener('error', function() {
-            console.warn("Audio file '1.m4a' was not loaded. Simulating progress bar on click.");
+            console.warn("Audio file '1.m4a' was not loaded. 실제 오디오 파일 경로를 확인해 주세요.");
         });
 
+        // 오디오 재생 위치가 변할 때마다 호출 (빨간 바 너비와 텍스트 타이머 실시간 동기화)
+        realAudio.addEventListener('timeupdate', function() {
+            const duration = realAudio.duration && realAudio.duration !== Infinity ? realAudio.duration : defaultDuration;
+            
+            // 현재 재생 시간 갱신
+            audioTimer.innerText = formatTime(realAudio.currentTime);
+            
+            // 재생 비율 계산하여 빨간 바 실시간 반영
+            const progressPercent = (realAudio.currentTime / duration) * 100;
+            timelineProgress.style.width = `${progressPercent}%`;
+        });
+
+        // 음원이 완전히 끝나면 초기 상태로 복구
+        realAudio.addEventListener('ended', function() {
+            resetAudioState();
+        });
+
+        // 재생/일시정지 클릭 이벤트
         audioBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             if (!isPlaying) {
@@ -701,23 +726,9 @@
                 playSvg.classList.add('hidden');
                 pauseSvg.classList.remove('hidden');
                 
-                // Play actual element if available
-                realAudio.play().catch(function() {
-                    // Fallback to pure visual timer progress
+                realAudio.play().catch(function(error) {
+                    console.warn("오디오 플레이 실패 (유저 상호작용 필요 혹은 파일 누락):", error);
                 });
-
-                playInterval = setInterval(() => {
-                    audioSec++;
-                    if (audioSec > totalDuration) {
-                        clearInterval(playInterval);
-                        resetAudioState();
-                        return;
-                    }
-                    const min = Math.floor(audioSec / 60);
-                    const sec = audioSec % 60;
-                    audioTimer.innerText = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-                    timelineProgress.style.width = `${(audioSec / totalDuration) * 100}%`;
-                }, 1000);
             } else {
                 pauseAudioState();
             }
@@ -728,24 +739,23 @@
             playSvg.classList.remove('hidden');
             pauseSvg.classList.add('hidden');
             realAudio.pause();
-            clearInterval(playInterval);
         }
 
         function resetAudioState() {
             pauseAudioState();
-            audioSec = 0;
+            realAudio.currentTime = 0;
             audioTimer.innerText = "00:00";
             timelineProgress.style.width = "0%";
         }
 
+        // 타임라인 임의 영역 클릭 시 오디오 재생 위치도 같이 점프 (스킵 기능)
         timelineContainer.addEventListener('click', function(e) {
+            const duration = realAudio.duration && realAudio.duration !== Infinity ? realAudio.duration : defaultDuration;
             const rect = timelineContainer.getBoundingClientRect();
             const percent = (e.clientX - rect.left) / rect.width;
-            audioSec = Math.floor(percent * totalDuration);
-            timelineProgress.style.width = `${percent * 100}%`;
-            const min = Math.floor(audioSec / 60);
-            const sec = audioSec % 60;
-            audioTimer.innerText = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            
+            // 실제 오디오의 재생 시점을 마우스 클릭 위치로 매핑
+            realAudio.currentTime = percent * duration;
         });
 
         // Initialize window charts on completely loaded DOM (Syntax Error Resolved)
@@ -828,7 +838,7 @@
                 }
             });
 
-            // Chart 4: Security Intrusion Factors (인천공항 세면실 무단침입 및 고장 도어락 소동 분석 6번 연계)
+            // Chart 4: Security Intrusion Factors
             const ctxScreening = document.getElementById('screeningChart').getContext('2d');
             new Chart(ctxScreening, {
                 type: 'doughnut',
