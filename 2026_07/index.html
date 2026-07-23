@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swissport AirScope - 2026년 7월호 글로벌 항공 안보 및 산업 동향</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            background-color: #F8FAFC; 
+            padding-top: 85px; 
+            color: #0F172A;
+            word-break: keep-all;
+        }
+        .gradient-bg { 
+            background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%); 
+        }
+        .gradient-accent {
+            background: linear-gradient(135deg, #FF6B00 0%, #E05200 100%);
+        }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 550px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 260px; 
+        }
+        .stat-card { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+        }
+        .stat-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 16px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04); 
+        }
+        .source-tag { 
+            font-size: 10px; 
+            font-weight: 800; 
+            padding: 3px 10px; 
+            border-radius: 6px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+        .link-btn { 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: #1D4ED8; 
+            border: 1px solid #BFDBFE; 
+            padding: 4px 12px; 
+            border-radius: 8px; 
+            transition: all 0.2s; 
+            background: #FFFFFF; 
+            white-space: nowrap; 
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .link-btn:hover { 
+            background-color: #EFF6FF; 
+            border-color: #3B82F6; 
+            color: #1E40AF;
+        }
+
+        /* Floating Top Bar */
+        .floating-header {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 94%;
+            max-width: 1240px;
+            height: 62px;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        /* Audio Player Bar */
+        .podcast-controls { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            flex-grow: 1; 
+            max-width: 58%; 
+        }
+        .youtube-bar {
+            flex-grow: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+            border-radius: 3px;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .youtube-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: #FF6B00;
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        /* Accordion Interactive Animation */
+        .answer-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.3s ease, margin-top 0.3s ease;
+            opacity: 0;
+        }
+        .answer-content.open {
+            max-height: 500px;
+            opacity: 1;
+            margin-top: 16px;
+        }
+
+        /* Floating Badge */
+        .date-badge {
+            background: linear-gradient(135deg, #FF6B00 0%, #D97706 100%);
+            padding: 5px 14px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 13px;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+            white-space: nowrap;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- Floating Header & Audio Player -->
+    <div class="floating-header">
+        <div class="podcast-controls">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-950/80 px-2 py-0.5 rounded border border-orange-500/30">AI Podcast</span>
+                <button id="playBtn" class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    <svg id="playIcon" class="w-4 h-4 fill-current text-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIcon" class="w-4 h-4 fill-current text-white hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+            </div>
+            <div class="youtube-bar" id="progressContainer">
+                <div class="youtube-progress" id="progressBar"></div>
+            </div>
+            <span id="currentTime" class="text-[11px] font-mono text-slate-300 w-10 text-right">0:00</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="hidden sm:block text-right">
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Swissport Monthly</p>
+                <p class="text-xs font-black text-white">AirScope</p>
+            </div>
+            <div class="date-badge text-white">
+                2026 JULY
+            </div>
+        </div>
+        
+        <audio id="podcastAudio">
+            <source src="1.m4a" type="audio/mp4">
+        </audio>
+    </div>
+
+    <!-- Brand Header -->
+    <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200/80">
+        <div class="flex items-center space-x-3">
+            <div class="bg-slate-900 text-white p-2.5 rounded-xl shadow-md flex items-center justify-center font-black tracking-tighter text-xl">
+                <!-- Brand Fallback Logo -->
+                <span class="text-orange-500">SWISS</span>PORT
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-black tracking-tight text-slate-900">AirScope</h1>
+                </div>
+                <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-0.5">Global Aviation Security & Macro-Economic Intelligence</p>
+            </div>
+        </div>
+        <div class="text-left sm:text-right bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div class="text-left">
+                <p class="text-[11px] text-slate-400 font-semibold">발행처: 총무보안팀</p>
+                <p class="text-xs font-bold text-slate-700">2026년 7월 주요 이슈 및 경제 동향 보고서</p>
+            </div>
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 font-bold text-xs">
+                7월
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
+
+        <!-- Main Hero Executive Banner -->
+        <section class="gradient-bg rounded-3xl shadow-2xl p-8 sm:p-10 text-white relative overflow-hidden border border-slate-800">
+            <div class="absolute -right-12 -bottom-12 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute right-1/3 -top-12 w-64 h-64 bg-orange-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="relative z-10 max-w-4xl">
+                <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 text-orange-400 text-xs font-bold mb-4">
+                    <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
+                    2026년 7월 핵심 안보 브리핑
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-black tracking-tight leading-tight mb-4 text-white">
+                    글로벌 항공 안보의 신 패러다임:<br class="hidden sm:inline"/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-200">첨단 AI 방산 실증과 전자기 무기화 위협의 대두</span>
+                </h2>
+                <p class="text-sm sm:text-base text-slate-300 font-medium leading-relaxed mb-6">
+                    2026년 7월 항공업계는 국산 AI 기반 스마트 검색 기술의 실전 배치를 계기로 새로운 보안 패러다임을 맞이하고 있습니다. 
+                    동시에 GPS 스푸핑과 같은 전자기적 위협의 민간 공역 침투, 미국 SAFER SKIES 법안 발효에 따른 C-UAS(안티드론) 권한 대전환, 
+                    그리고 항공유 가격 급증에 따른 IATA의 고비용-저수익 수익성 악화 경고에 입체적으로 대응해야 하는 중대한 기로에 서 있습니다.
+                </p>
+
+                <!-- Key Metric Highlights Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">TSA 7월 최고 수송</p>
+                        <p class="text-xl font-black text-orange-400 mt-1">1,870만 명</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">독립기념일 무결점 검측</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">항공유 비중 (IATA)</p>
+                        <p class="text-xl font-black text-amber-300 mt-1">31.4%</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">총 3,510억 달러 지출</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">글로벌 순이익률</p>
+                        <p class="text-xl font-black text-red-400 mt-1">2.0%</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">230억 달러로 하향 조정</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">승객 1인당 순마진</p>
+                        <p class="text-xl font-black text-blue-300 mt-1">$4.50</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">2025년 $9.10 대비 반토막</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature 1: Korea Aviation Security Week 2026 -->
+        <section class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-100">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="source-tag bg-blue-100 text-blue-800">Main Feature</span>
+                        <span class="text-xs text-slate-400 font-semibold">2026년 7월 8일 ~ 10일 개최</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">
+                        대한민국 ‘2026 항공보안주간’ 개최와 첨단 국산 기술 실증
+                    </h3>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="https://www.mediaic.co.kr/news/articleView.html?idxno=83237">
+                        미디어 인천신문 보도자료 ↗
+                    </a>
+                    <a href="https://www.econovill.com/news/articleView.html?idxno=744629">
+                        이코노믹 리뷰 보도자료 ↗
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-4 text-slate-600 font-medium leading-relaxed text-sm sm:text-base">
+                    <div class="bg-slate-50 p-4 rounded-2xl border-l-4 border-blue-600 text-slate-800 font-bold text-base">
+                        "국민과 함께 만드는 항공보안 - AI 기반 첨단기술과 국민참여로 여는 안전한 하늘길"
+                    </div>
+                    <p>
+                        국토교통부가 국가정보원, 경찰청과 공동 주최하고 한국공항공사, 인천국제공항공사, 한국교통안전공단 등이 공동 주관한 
+                        <strong>제2회 '2026 항공보안주간'</strong>이 국립항공박물관과 인천·김포공항 등 전국 거점 공항 일원에서 역대 최대 규모로 성료되었습니다.
+                    </p>
+                    <p>
+                        기술적 핵심은 국산화에 성공한 차세대 지능형 보안 장비의 실전 실증이었습니다. 
+                        <strong>AI 기반 양방향 X-ray 검색장비</strong>와 <strong>저고도 드론 탐지 레이더</strong>는 은닉 무기나 소형 비행체를 실시간으로 정밀 식별·추적하여 글로벌 관계자들의 주목을 받았습니다.
+                    </p>
+                    <p>
+                        또한 방폭복·방폭헬멧 착용 체험, 기내 은닉물 핸드스캐너 탐지 체험 등 승객과 조업사가 함께 동참하는 
+                        <em>'상호 안보 예방 행동 모델'</em> 캠페인을 전개하여 보안 문화를 대대적으로 확산시켰습니다.
+                    </p>
+                </div>
+
+                <div class="lg:col-span-5 bg-slate-900 text-white p-6 rounded-3xl space-y-5">
+                    <h4 class="text-sm font-black uppercase text-orange-400 tracking-wider flex items-center gap-2">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        실증 핵심 첨단 보안 장비
+                    </h4>
+                    <ul class="space-y-4 text-xs font-medium">
+                        <li class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex items-start gap-3">
+                            <span class="bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded mt-0.5">01</span>
+                            <div>
+                                <p class="font-bold text-white text-sm">AI 양방향 X-ray 검색기</p>
+                                <p class="text-slate-300 mt-1">판독 요원 육안의 한계를 극복. 딥러닝 기반 복합 은닉 무기 및 위험물 자동 판독기 능.</p>
+                            </div>
+                        </li>
+                        <li class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex items-start gap-3">
+                            <span class="bg-orange-600 text-white text-[10px] font-black px-2 py-0.5 rounded mt-0.5">02</span>
+                            <div>
+                                <p class="font-bold text-white text-sm">저고도 드론 탐지 레이더</p>
+                                <p class="text-slate-300 mt-1">공항 주위 저고도 소형 드론의 반사파를 실시간 추적하여 3D 위치 좌표 제공.</p>
+                            </div>
+                        </li>
+                        <li class="bg-white/5 p-3.5 rounded-xl border border-white/10 flex items-start gap-3">
+                            <span class="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded mt-0.5">03</span>
+                            <div>
+                                <p class="font-bold text-white text-sm">휴대용 보안검색 핸드스캐너</p>
+                                <p class="text-slate-300 mt-1">현장 조업 및 보안 요원의 승객/화물 정밀 수동 검사를 획기적으로 신속화.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature 2 & 3 Grid: RAF GPS Spoofing & US SAFER SKIES Act -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Feature 2: RAF GPS Spoofing Threat -->
+            <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 stat-card border border-slate-100">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="source-tag bg-red-100 text-red-800">Security Threat Analysis</span>
+                    <a href="https://www.theguardian.com/world/2026/may/24/gps-jammed-on-raf-jet-carrying-uk-defence-secretary-close-to-russian-border" target="_blank" class="link-btn">기사 보기 ↗</a>
+                </div>
+                
+                <h3 class="text-xl font-black text-slate-900 mb-3 leading-snug">
+                    전자기적 무기화 위협: 영국 공군(RAF) GPS 신호 기만(Spoofing) 사건
+                </h3>
+
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium mb-4">
+                    에스토니아에서 이륙한 영국 왕실 공군(RAF) 팰컨 900LX 관용기가 러시아 접경 공역 통과 중 
+                    강력한 <strong>재밍(Jamming)</strong> 및 <strong>스푸핑(Spoofing)</strong> 공격을 받아 항법 장치가 마비되었습니다.
+                </p>
+
+                <!-- Comparison Box -->
+                <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-2xl mb-4 border border-slate-200/60">
+                    <div class="bg-white p-3 rounded-xl border border-slate-200">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">전파 방해 (Jamming)</span>
+                        <p class="text-xs font-bold text-slate-800 mt-1">신호 감도 0화</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5">신호 상실 경보 발생으로 유의 감지 가능</p>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-xl border border-red-200">
+                        <span class="text-[10px] font-bold text-red-600 uppercase">좌표 기만 (Spoofing)</span>
+                        <p class="text-xs font-bold text-red-900 mt-1">모조 위성 신호 주입</p>
+                        <p class="text-[11px] text-red-700 mt-0.5">정상 비행으로 착각시켜 적대국 영공 유도</p>
+                    </div>
+                </div>
+
+                <div class="mt-auto bg-blue-50 p-4 rounded-2xl border border-blue-200/80">
+                    <p class="text-xs font-bold text-blue-900 flex items-center gap-1.5 mb-1">
+                        <svg class="w-4 h-4 fill-current text-blue-600" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2zm0-10h2v8h-2z"/></svg>
+                        사브(Saab) & CAE 대응 약정 (2026.07.17)
+                    </p>
+                    <p class="text-[11px] text-slate-600 font-medium">
+                        양사는 MOU를 체결하고 전자전 교란 상황에서도 수동 조종 및 착륙을 지원하는 '차세대 전자기 교란 대처 시뮬레이터 훈련 시스템'을 긴급 보급하기로 체결하였습니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 3: US SAFER SKIES Act -->
+            <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 stat-card border border-slate-100">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="source-tag bg-orange-100 text-orange-800">Global Regulation</span>
+                    <a href="https://www.crowell.com/en/insights/client-alerts/doj-and-dhs-issue-interim-final-rule-on-state-and-local-counter-drone-authority-under-the-safer-skies-act" target="_blank" class="link-btn">법안 전문보기 ↗</a>
+                </div>
+
+                <h3 class="text-xl font-black text-slate-900 mb-3 leading-snug">
+                    드론 위협 대응의 법적 대전환: 미국 ‘SAFER SKIES 법안’ 발효
+                </h3>
+
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium mb-4">
+                    미 국토안보부(DHS)와 사법부(DOJ)는 7월 6일 자로 안티드론(C-UAS) 권한을 지방 사법기관 및 교도소 보안 요원(SLTT)까지 확대하는 SAFER SKIES Act 잠정 최종 규칙을 전격 시행하였습니다.
+                </p>
+
+                <!-- Tier System Cards -->
+                <div class="space-y-2.5 mb-4">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-black text-blue-700 bg-blue-100 px-2 py-0.5 rounded">Tier 1</span>
+                            <span class="text-xs font-bold text-slate-800 ml-2">탐지 및 경고 권한</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">경로 식별, 위치 역추적, 구두 경고</p>
+                    </div>
+                    <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-black text-amber-800 bg-amber-200 px-2 py-0.5 rounded">Tier 2</span>
+                            <span class="text-xs font-bold text-amber-950 ml-2">물리적 제압 & 요격</span>
+                        </div>
+                        <p class="text-[11px] text-amber-800 font-medium">RF Jamming, Spoofing, EMP, 그물총</p>
+                    </div>
+                </div>
+
+                <div class="mt-auto bg-slate-900 text-white p-3.5 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-orange-400">FCC 하드웨어 백도어 단속 (7월 10일)</p>
+                        <p class="text-[11px] text-slate-300">White-labeling 우회 제조 8개사에 20만 달러 벌금 부과</p>
+                    </div>
+                    <span class="text-xs font-black bg-red-600 text-white px-2.5 py-1 rounded-lg">유통 차단</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 4: TSA Performance & HR 9328 Military Travel Bill -->
+        <section class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-100">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <span class="source-tag bg-emerald-100 text-emerald-800">Passenger Security</span>
+                    <h3 class="text-2xl font-black text-slate-900 mt-2">
+                        미국 TSA 7월 연휴 최고 실적 및 군 장병 우대 법안(HR 9328)
+                    </h3>
+                </div>
+                <a href="https://www.tsa.gov/news/press/releases/2026/06/25/tsa-prepared-screen-nearly-187-million-air-travelers-fourth-july" target="_blank" class="link-btn">TSA 보도자료 ↗</a>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-6 space-y-4">
+                    <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                        TSA는 2026년 독립기념일 연휴(6/30~7/6) 동안 미 항공 역사상 최고 수치인 <strong>1,870만 명</strong>의 여객을 단 한 건의 안보 균열 없이 완벽히 검색 완료했습니다. 
+                        특히 7월 2일 하루에만 <strong>300만 명 이상</strong>이 집중되었으나 AI 지능형 수하물 검색기와 사전 인력 배치로 병목을 완전히 해소했습니다.
+                    </p>
+
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                        <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider">주요 입법 및 예우 프로그램</h4>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded mt-0.5">신규</span>
+                            <p class="text-xs font-semibold text-slate-700">
+                                <strong>Honor Lane & Veterans Ambassador:</strong> 33개 주요 공항으로 확장하여 군 유공자 및 현역 군인 무료 에스코트 및 전용 패스 가동.
+                            </p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-orange-600 text-white text-[10px] font-black px-2 py-0.5 rounded mt-0.5">법안</span>
+                            <p class="text-xs font-semibold text-slate-700">
+                                <strong>HR 9328 통과 (7월 13일 미 하원 만장일치):</strong> 군 장병 및 가족 대상 소지품 탈착 없는 전용 Expedited Security Pilot 구축 재원 마련.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Visual Chart for TSA Throughput -->
+                <div class="lg:col-span-6 bg-slate-50 p-5 rounded-3xl border border-slate-200/60">
+                    <h4 class="text-center font-bold text-slate-700 mb-2 text-xs uppercase tracking-widest">TSA 연휴 일일 검측량 및 AI 효과</h4>
+                    <div class="chart-container">
+                        <canvas id="tsaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature 5: IATA Economic Outlook & Data Table -->
+        <section class="bg-slate-900 rounded-3xl shadow-2xl p-6 sm:p-10 text-white">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+                <div>
+                    <span class="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[10px] font-black px-3 py-1 rounded-full uppercase">Macro Economy</span>
+                    <h3 class="text-2xl sm:text-3xl font-black mt-2 tracking-tight">
+                        글로벌 항공 시장 동향: 고비용 저수익 국면 진입
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1 font-medium">IATA 2026년 하반기 글로벌 항공 경제 개정 보고서 분석</p>
+                </div>
+                <a href="https://www.iata.org/en/publications/economics/reports/global-outlook-for-air-transport-june-2026/" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    IATA 리포트 원문 ↗
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+                <!-- Text Narrative -->
+                <div class="lg:col-span-5 space-y-4 text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+                    <p>
+                        2026년 하반기 전 세계 항공사 총매출액은 <strong>1조 1,700억 달러(+9.5%)</strong>로 역대 최대가 예상되나, 
+                        운영 비용이 <strong>13.1% 급증</strong>함에 따라 실질 순이익은 당초 예상의 절반 수준인 <strong>230억 달러(순이익률 2.0%)</strong>로 전격 하향 조정되었습니다.
+                    </p>
+                    <div class="p-4 bg-white/5 rounded-2xl border border-white/10">
+                        <p class="text-xs font-bold text-orange-400 mb-1">최대 원인: 항공유 폭등 & 지정학 우회 노선</p>
+                        <p class="text-slate-300 text-xs">
+                            항공유 지출액이 3,510억 달러로 급증하며 전체 운영 비용의 <strong>31.4%</strong>를 차지하고 있으며, 중동/우크라이나 우회 노선 비행 연장이 극심한 정제 마진 크랙 스프레드를 유발하고 있습니다.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Two Side Charts -->
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
+                        <h4 class="text-center text-xs font-bold text-slate-300 mb-2">순이익 & 승객 마진 변화</h4>
+                        <div class="chart-container h-[200px]">
+                            <canvas id="iataProfitChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
+                        <h4 class="text-center text-xs font-bold text-slate-300 mb-2">항공사 비중별 비용 구조</h4>
+                        <div class="chart-container h-[200px]">
+                            <canvas id="costStructureChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Data Table -->
+            <div class="overflow-x-auto custom-scrollbar bg-white/5 rounded-2xl border border-white/10 p-2">
+                <table class="w-full text-left text-xs font-medium min-w-[600px]">
+                    <thead>
+                        <tr class="border-b border-white/10 text-orange-400 font-bold uppercase">
+                            <th class="p-3">주요 거시경제 지표 (IATA 2026 하반기)</th>
+                            <th class="p-3">2025년 최종 실적</th>
+                            <th class="p-3">2026년 하반기 전망</th>
+                            <th class="p-3">주요 특징 및 영향</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 text-slate-200">
+                        <tr>
+                            <td class="p-3 font-bold text-white">글로벌 여객 수송 (RPK)</td>
+                            <td class="p-3">49억 8,000만 명</td>
+                            <td class="p-3 font-bold text-blue-300">51억 명 (+2.1%)</td>
+                            <td class="p-3 text-slate-400">성장세 유지되나 고유가 및 영공 분절화로 둔화</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-white">글로벌 화물 수송 (CTK)</td>
+                            <td class="p-3">7,150만 톤</td>
+                            <td class="p-3 font-bold text-blue-300">7,170만 톤 (+0.7%)</td>
+                            <td class="p-3 text-slate-400">중동 위기로 벨리홀드 차단, 고단가 Yield 마진 재편</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-white">항공유 가격 대비 비중</td>
+                            <td class="p-3">24.0% 내외</td>
+                            <td class="p-3 font-bold text-red-400">31.4% (3,510억 달러)</td>
+                            <td class="p-3 text-slate-400">정제 마진 폭등으로 항공사 비용 통제의 최대 아킬레스건</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-white">업계 합산 순이익 (Net Profit)</td>
+                            <td class="p-3">450억 달러</td>
+                            <td class="p-3 font-bold text-red-400">230억 달러 (이익률 2.0%)</td>
+                            <td class="p-3 text-slate-400">인건비 및 우회 운항비 지출 상쇄로 코로나 이후 최악</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-white">승객 1인당 순마진</td>
+                            <td class="p-3">USD 9.10</td>
+                            <td class="p-3 font-bold text-amber-300">USD 4.50</td>
+                            <td class="p-3 text-slate-400">탑승률 84.0% 최고치에도 실질 마진은 절반으로 붕괴</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Feature 6: Swissport Implications & Interactive Q&A Accordion -->
+        <section class="bg-gradient-to-br from-blue-900 to-slate-900 rounded-3xl shadow-xl p-6 sm:p-10 text-white relative overflow-hidden border border-blue-800">
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="p-2 bg-orange-500 rounded-xl text-white font-black">SP</span>
+                    <div>
+                        <h2 class="text-2xl font-black text-white">Swissport 현장 적용을 위한 실무 전략 제언</h2>
+                        <p class="text-xs text-blue-200 mt-0.5">지상 조업, 화물 터미널, 수속 카운터 요원을 위한 3대 현장 실천 가이드</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Question Card 1 -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 flex flex-col justify-between hover:bg-white/15 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                        <div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5">
+                                <span class="bg-orange-500/30 text-orange-300 border border-orange-400/30 text-[10px] font-black px-2.5 py-1 rounded-full whitespace-nowrap shrink-0">Q1. 화물 보안 & 램프 안전</span>
+                                <span class="text-[11px] text-blue-300 group-hover:text-white font-bold tracking-tight whitespace-nowrap shrink-0 ml-auto">클릭하여 펼치기 ↓</span>
+                            </div>
+                            <h4 class="text-base font-black text-white mb-2 leading-snug">
+                                화물터미널 보안검색 장비 이상 발생 및 램프 전자기기 고장 시 대응체계는?
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                지상조업사의 핵심인 화물 보안검색(RACS) 정밀도 향상과 램프 내 장비/항공기 유도 안전 수칙입니다.
+                            </p>
+                        </div>
+
+                        <div class="answer-content">
+                            <div class="p-4 bg-slate-950/80 rounded-xl border border-white/10 text-xs text-slate-200 space-y-2">
+                                <p class="font-bold text-orange-400">💡 현장 실천 가이드</p>
+                                <p>• <strong>보안검색 운영 매뉴얼 준수:</strong> 보안검색 매뉴얼(SOP)에 따라 2차 정밀검색 및 개장검사를 실시하고, 검사 결과를 신속히 보고.</p>
+                                <p>• <strong>램프 전자기기 이상 대응 절차 이행:</strong> 무전기·장비 센서 등 전자기기 이상 발생 시 대응 매뉴얼에 따라 즉시 보고, 수신호·유도원 운영 및 대체 절차를 적용하여 안전하게 작업 수행.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Card 2 -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 flex flex-col justify-between hover:bg-white/15 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                        <div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5">
+                                <span class="bg-blue-500/30 text-blue-300 border border-blue-400/30 text-[10px] font-black px-2.5 py-1 rounded-full whitespace-nowrap shrink-0">Q2. 여객 수속 & 성수기 혼잡</span>
+                                <span class="text-[11px] text-blue-300 group-hover:text-white font-bold tracking-tight whitespace-nowrap shrink-0 ml-auto">클릭하여 펼치기 ↓</span>
+                            </div>
+                            <h4 class="text-base font-black text-white mb-2 leading-snug">
+                                성수기 수속 혼잡 완화 및 군 장병/우대 승객 수속 케어 방안은?
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                여객 터미널 카운터 수속 요원이 성수기 병목을 줄이고 우대 승객 수속을 효율화하는 실천안입니다.
+                            </p>
+                        </div>
+
+                        <div class="answer-content">
+                            <div class="p-4 bg-slate-950/80 rounded-xl border border-white/10 text-xs text-slate-200 space-y-2">
+                                <p class="font-bold text-orange-400">💡 현장 실천 가이드</p>
+                                <p>• <strong>성수기 수속 혼잡 완화:</strong> 출발편 집중 시간대에는 현장 인력을 탄력적으로 재배치하고, 대기열을 지속 모니터링하여 혼잡 발생 시 즉시 응대 및 안내를 실시.</p>
+                                <p>• <strong>군 장병·우대 승객 수속 케어:</strong> 군 장병 및 교통약자 등 우대 승객을 먼저 확인하여 키오스크 이용, 수하물 위탁, 탑승수속 전 과정을 적극 안내하고 필요 시 우선 지원을 제공.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Card 3 -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 flex flex-col justify-between hover:bg-white/15 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                        <div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5">
+                                <span class="bg-emerald-500/30 text-emerald-300 border border-emerald-400/30 text-[10px] font-black px-2.5 py-1 rounded-full whitespace-nowrap shrink-0">Q3. 정시성(OTP) & 비용 절감</span>
+                                <span class="text-[11px] text-blue-300 group-hover:text-white font-bold tracking-tight whitespace-nowrap shrink-0 ml-auto">클릭하여 펼치기 ↓</span>
+                            </div>
+                            <h4 class="text-base font-black text-white mb-2 leading-snug">
+                                항공사 비용 급증(유류비 31.4%) 상황에서 조업 지연 방지 및 GSE 절감안은?
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                항공사 비용 압박 극복을 위한 지상조업 지연(Delay) 0분 달성과 램프 장비 에너지 절약 행동입니다.
+                            </p>
+                        </div>
+
+                        <div class="answer-content">
+                            <div class="p-4 bg-slate-950/80 rounded-xl border border-white/10 text-xs text-slate-200 space-y-2">
+                                <p class="font-bold text-orange-400">💡 현장 실천 가이드</p>
+                                <p>• <strong>지상 정시성(OTP) 확보로 딜레이 최소화:</strong> 항공기 도착 전 장비·인력 배치를 완료하고, 실시간 운항정보를 공유하여 작업 공백 없이 즉시 조업을 개시.</p>
+                                <p>• <strong>GSE(지상장비) 공회전 금지 & e-GSE 가동:</strong> 토잉카, GPU 등 대기 장비 공회전 전면 중지 및 전기 조업장비 충전 관리로 유류비/에너지 절감.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center py-10 text-slate-400 text-[11px] border-t border-slate-200 space-y-2">
+            <p class="font-black text-slate-600 uppercase tracking-widest">© 2026 SWISSPORT KOREA - SAFETY & SECURITY INTELLIGENCE</p>
+            <p>본 사보는 임직원 직무 교육 및 안보 동향 강화를 위해 제작된 내부 공유용 웹 리포트입니다.</p>
+            <p class="text-slate-300">Ref Sources: 국토교통부, TSA, IATA Global Economics, CISA, Osprey Flight Solutions, Crowell & Moring</p>
+        </footer>
+    </main>
+
+    <script>
+        // Audio Player Logic
+        const audio = document.getElementById('podcastAudio');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+
+        audio.onerror = () => { 
+            console.warn("Podcast audio file (1.m4a) not found. Audio controls in preview mode."); 
+        };
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (audio.paused) {
+                audio.play().catch(e => {
+                    console.log("Audio play prevented or file missing");
+                });
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                audio.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            if (isFinite(audio.duration) && audio.duration > 0) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = `${percent}%`;
+                currentTimeEl.innerText = formatTime(audio.currentTime);
+            }
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickPos = (e.clientX - rect.left) / rect.width;
+            if (isFinite(audio.duration) && audio.duration > 0) {
+                audio.currentTime = clickPos * audio.duration;
+            }
+        });
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Accordion Interaction
+        function toggleAnswer(element) {
+            const content = element.querySelector('.answer-content');
+            const label = element.querySelector('span:last-of-type');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                if(label) label.innerText = "클릭하여 펼치기 ↓";
+            } else {
+                content.classList.add('open');
+                if(label) label.innerText = "답변 접기 ↑";
+            }
+        }
+
+        // Chart 1: TSA July Holiday Throughput
+        new Chart(document.getElementById('tsaChart'), {
+            type: 'bar',
+            data: {
+                labels: ['6/30', '7/1', '7/2 (최고기록)', '7/3', '7/4 (독립기념일)', '7/5', '7/6'],
+                datasets: [{
+                    label: '일별 수송 인원 (만 명)',
+                    data: [245, 268, 302, 275, 230, 280, 270],
+                    backgroundColor: ['#93C5FD', '#60A5FA', '#FF6B00', '#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: false, min: 200, grid: { color: '#E2E8F0' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Chart 2: IATA Profit & Margin Comparison
+        new Chart(document.getElementById('iataProfitChart'), {
+            type: 'bar',
+            data: {
+                labels: ['합산 순이익 ($B)', '1인당 마진 ($)'],
+                datasets: [
+                    {
+                        label: '2025 실적',
+                        data: [45, 9.1],
+                        backgroundColor: '#3B82F6',
+                        borderRadius: 6
+                    },
+                    {
+                        label: '2026 하반기 전망',
+                        data: [23, 4.5],
+                        backgroundColor: '#EF4444',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#CBD5E1', font: { size: 10 } } }
+                },
+                scales: {
+                    y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94A3B8' } },
+                    x: { grid: { display: false }, ticks: { color: '#94A3B8' } }
+                }
+            }
+        });
+
+        // Chart 3: Airline Cost Structure (IATA 2026)
+        new Chart(document.getElementById('costStructureChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['항공유 지출 (31.4%)', '인건비 및 지상조업', '장비 유지보수', '기타 운항비'],
+                datasets: [{
+                    data: [31.4, 28.5, 18.1, 22.0],
+                    backgroundColor: ['#FF6B00', '#3B82F6', '#10B981', '#64748B'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        position: 'bottom',
+                        labels: { color: '#CBD5E1', font: { size: 9 }, boxWidth: 10 } 
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
