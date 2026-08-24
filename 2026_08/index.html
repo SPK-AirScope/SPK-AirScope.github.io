@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swissport AirScope - 2026년 8월호 글로벌 항공 안보 및 산업 동향리포트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            background-color: #F8FAFC; 
+            padding-top: 85px; 
+            color: #0F172A;
+            word-break: keep-all;
+        }
+        .gradient-bg { 
+            background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%); 
+        }
+        .gradient-accent {
+            background: linear-gradient(135deg, #FF6B00 0%, #E05200 100%);
+        }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 550px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 260px; 
+        }
+        .stat-card { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+        }
+        .stat-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 16px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04); 
+        }
+        .source-tag { 
+            font-size: 10px; 
+            font-weight: 800; 
+            padding: 3px 10px; 
+            border-radius: 6px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+        .link-btn { 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: #1D4ED8; 
+            border: 1px solid #BFDBFE; 
+            padding: 4px 12px; 
+            border-radius: 8px; 
+            transition: all 0.2s; 
+            background: #FFFFFF; 
+            white-space: nowrap; 
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .link-btn:hover { 
+            background-color: #EFF6FF; 
+            border-color: #3B82F6; 
+            color: #1E40AF;
+        }
+
+        /* Floating Top Bar */
+        .floating-header {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 94%;
+            max-width: 1240px;
+            height: 62px;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        /* Audio Player Bar */
+        .podcast-controls { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            flex-grow: 1; 
+            max-width: 58%; 
+        }
+        .youtube-bar {
+            flex-grow: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+            border-radius: 3px;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .youtube-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: #FF6B00;
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        /* Accordion Interactive Animation */
+        .answer-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.3s ease, margin-top 0.3s ease;
+            opacity: 0;
+        }
+        .answer-content.open {
+            max-height: 500px;
+            opacity: 1;
+            margin-top: 16px;
+        }
+
+        /* Floating Badge */
+        .date-badge {
+            background: linear-gradient(135deg, #FF6B00 0%, #D97706 100%);
+            padding: 5px 14px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 13px;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- Floating Header & Audio Player -->
+    <div class="floating-header">
+        <div class="podcast-controls">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-950/80 px-2 py-0.5 rounded border border-orange-500/30">AI Briefing</span>
+                <button id="playBtn" class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition focus:outline-none focus:ring-2 focus:ring-orange-400" aria-label="음성 재생/일시정지">
+                    <svg id="playIcon" class="w-4 h-4 fill-current text-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIcon" class="w-4 h-4 fill-current text-white hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+            </div>
+            <div class="youtube-bar" id="progressContainer">
+                <div class="youtube-progress" id="progressBar"></div>
+            </div>
+            <span id="currentTime" class="text-[11px] font-mono text-slate-300 w-10 text-right">0:00</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="hidden sm:block text-right">
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Swissport Korea</p>
+                <p class="text-xs font-black text-white">AirScope</p>
+            </div>
+            <div class="date-badge text-white">
+                2026 AUGUST
+            </div>
+        </div>
+        
+        <audio id="podcastAudio">
+            <source src="1.m4a" type="audio/mp4">
+        </audio>
+    </div>
+
+    <!-- Brand Header -->
+    <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200/80">
+        <div class="flex items-center space-x-3">
+            <div class="bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                <img src="spkLogoNEW.jpg" alt="Swissport Logo" class="h-10 object-contain" onerror="this.outerHTML='<div class=\'bg-slate-900 text-white p-2 rounded-xl font-black text-lg\'><span class=\'text-red-600\'>SWISS</span>PORT</div>'">
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-black tracking-tight text-slate-900">AirScope</h1>
+                    <span class="text-[10px] bg-red-100 text-red-700 font-extrabold px-2 py-0.5 rounded-md uppercase">Monthly Vol.28</span>
+                </div>
+                <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-0.5">Swissport Korea Ground Handling Intelligence</p>
+            </div>
+        </div>
+        <div class="text-left sm:text-right bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div class="text-left">
+                <p class="text-[11px] text-slate-400 font-semibold">발행처: 총무보안팀 </p>
+                <p class="text-xs font-bold text-slate-700">2026년 8월 항공산업 보안 동향리포트</p>
+            </div>
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-50 text-red-600 font-bold text-xs">
+                8월
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
+
+        <!-- Executive Summary Banner -->
+        <section class="gradient-bg rounded-3xl shadow-2xl p-8 sm:p-10 text-white relative overflow-hidden border border-slate-800">
+            <div class="absolute -right-12 -bottom-12 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute right-1/3 -top-12 w-64 h-64 bg-orange-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="relative z-10 max-w-4xl">
+                <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 text-orange-400 text-xs font-bold mb-4">
+                    <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
+                    2026년 8월 핵심 이슈 브리핑
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-black tracking-tight leading-tight mb-4 text-white">
+                    메가 캐리어 출범과 K-항공보안 혁신:<br class="hidden sm:inline"/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-200">지상조업 안전·보안 체계의 정밀화 요구</span>
+                </h2>
+                <p class="text-sm sm:text-base text-slate-300 font-medium leading-relaxed mb-6">
+                    2026년 8월 대한민국 항공 산업은 <strong>대한항공과 아시아나항공의 합병 최종 의결(12월 17일 통합 출범)</strong>로 거대 메가 캐리어시대를 맞이하고 있습니다. 
+                    지상조업 현장에서는 화물 호황 이면의 노선 불균형 및 유류할증료 급등 리스크에 대비하는 동시에, 
+                    <strong>사족보행로봇·AI X-ray·비접촉 ETD</strong> 등 첨단 대테러 대응 장비 도입에 발맞춘 철저한 현장 보안 수칙 준수가 강력히 요청됩니다.
+                </p>
+
+                <!-- Metric Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">통합 등기 예정일</p>
+                        <p class="text-lg sm:text-xl font-black text-orange-400 mt-1">12월 17일</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">대한항공·아시아나 합병</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">화물 연속 성장</p>
+                        <p class="text-lg sm:text-xl font-black text-amber-300 mt-1">8개월 연속</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">두 자릿수 급증세</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">9월 유류할증료</p>
+                        <p class="text-lg sm:text-xl font-black text-red-400 mt-1">21단계 적용</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">8월(14단계) 대비 폭등</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">공항 관제권 금지</p>
+                        <p class="text-lg sm:text-xl font-black text-blue-300 mt-1">반경 9.3km</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">불법 드론 통제 구역</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 1: Domestic Mega Carrier Era -->
+        <section class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-100">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="source-tag bg-blue-100 text-blue-800">Domestic Issue</span>
+                        <span class="text-xs text-slate-400 font-semibold">2026년 8월 12일 최종 가결</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">
+                        1. 대한민국 초대형 메가 캐리어 출범 가속화 및 조업 환경 변화
+                    </h3>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="https://biz.chosun.com/industry/company/2026/08/12/HKSLH6EJVBC2THRGZA75ROQDBU/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                        조선비즈 기사 ↗
+                    </a>
+                    <a href="https://www.koreanair.com/contents/footer/customer-support/notice/2026/2608-merge" target="_blank" rel="noopener noreferrer" class="link-btn">
+                        대한항공 공고 ↗
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-4 text-slate-600 font-medium leading-relaxed text-sm sm:text-base">
+                    <p>
+                        2020년 11월 시작된 <strong>대한항공과 아시아나항공의 기업결합 절차</strong>가 2026년 8월 12일 양사 이사회 및 임시주주총회 의결을 거쳐 최종 가결되었습니다 (아시아나 찬성률 99.3%). 
+                        양사는 9월 14일까지 채권자 이의제출 기간을 거친 뒤, <strong>12월 17일 최종 합병 등기</strong>를 완료하고 세계 10대 메가 캐리어로 공식 출범합니다.
+                    </p>
+                    <div class="bg-slate-50 p-4 rounded-2xl border-l-4 border-blue-600 text-slate-700 text-xs sm:text-sm space-y-2">
+                        <p class="font-bold text-slate-900">💡 스위스포트 지상직원 핵심 착안사항:</p>
+                        <p>• 통합 운항증명(AOC) 취득 및 양사 인력/직무 통합 교육 진행 중</p>
+                        <p>• 통합 시 여객 및 화물 조업의 프로세스 표준화가 이루어지므로, 핸들링 매뉴얼 변경 사항 사전 숙지 필수</p>
+                        <p>• 마일리지 통합 및 운항 스케줄 변동에 따른 여객 카운터 혼선 대비가 필요</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 bg-slate-50 p-6 rounded-3xl border border-slate-100 flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-slate-800 text-sm">2026년 8월 국내 항공사 브랜드 평판</h4>
+                        <a href="https://www.energy-news.co.kr/news/articleView.html?idxno=227297" target="_blank" rel="noopener noreferrer" class="text-[10px] text-blue-600 font-bold hover:underline">출처: 한국기업평판연구소</a>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="brandChart"></canvas>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-2 text-center">* 대한항공 1위(2,156만), 한진칼 2위, 아시아나 3위, 제주항공 4위</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2: Cargo Market & Operational Risks -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-100 stat-card">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="source-tag bg-orange-100 text-orange-800">Cargo & Logistics</span>
+                    <a href="https://www.forwarder.kr/bbs/board.php?bo_table=menu6_1_1&wr_id=8792" target="_blank" rel="noopener noreferrer" class="link-btn">포워더KR 리포트 ↗</a>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-3">2. 항공화물 호황과 노선 불균형 딜레마</h3>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium mb-4 leading-relaxed">
+                    AI 서버·반도체 등 하드웨어 및 이커머스 물동량 증가로 8개월 연속 두 자릿수 화물 성장을 달성했습니다. 
+                    그러나 아시아발 프론트홀 적재율은 88%에 달하는 반면, 현지 귀환 백홀 적재율은 35~45%에 불과하여 <strong>'공기 운항(Deadhead)' 손실</strong>이 지속 발생하고 있습니다.
+                </p>
+                <div class="bg-slate-50 rounded-2xl p-4 flex-grow flex flex-col justify-center">
+                    <div class="chart-container h-[200px]">
+                        <canvas id="cargoRouteChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-100 stat-card">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="source-tag bg-red-100 text-red-800">Operational Risks</span>
+                    <a href="https://n.news.naver.com/mnews/article/003/0014133465?sid=101" target="_blank" rel="noopener noreferrer" class="link-btn">유류할증료 뉴스 ↗</a>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-3">3. 중동 리스크, 태풍, 유류할증료 급등</h3>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium mb-4 leading-relaxed">
+                    중동 지정학 위기(두바이/도하 마비)로 오만(MCT) 경유 RFS 트럭킹 우회가 급상승하였으며, 태풍 '돌핀' 영향으로 Ocean-to-Air 모달시프트가 격화되었습니다. 
+                    국제 유가 급등으로 <strong>9월 유류할증료는 21단계(편도 최대 19.4만 원)로 폭등</strong>합니다.
+                </p>
+                <div class="bg-slate-900 text-white rounded-2xl p-5 flex-grow flex flex-col justify-center space-y-3">
+                    <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
+                        <span class="text-slate-400">8월 유류할증료</span>
+                        <span class="font-bold text-amber-400">14단계 적용</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
+                        <span class="text-slate-400">9월 유류할증료 (예정)</span>
+                        <span class="font-black text-red-400 text-sm">21단계 (7단계 일괄 인상!)</span>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-xl text-[11px] text-slate-300 leading-relaxed">
+                        ⚠️ <strong>지상 조업 영향:</strong> 유류비 상승 및 스케줄 지연에 따른 화물 조업의 정확성·신속성 향상과 램프 내 유류 절감(GSE 전동화 준수) 노력이 직결됩니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 3: Anti-Drone & AI Aviation Security -->
+        <section class="bg-slate-900 rounded-3xl shadow-2xl overflow-hidden text-white border border-slate-800">
+            <div class="p-6 sm:p-10">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-blue-500/20 px-3 py-1 rounded-full text-blue-400 text-xs font-bold mb-2">
+                            K-Aviation Security 2026
+                        </div>
+                        <h3 class="text-2xl sm:text-3xl font-black tracking-tight">4. 인천공항 드론테러 합동훈련 & AI 첨단 보안 상용화</h3>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="https://www.kgdm.co.kr/news/articleView.html?idxno=2011475" target="_blank" rel="noopener noreferrer" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3.5 py-2 rounded-xl font-bold transition">
+                            인천공항 훈련 기사 ↗
+                        </a>
+                        <a href="http://www.boannews.com/media/view.asp?idx=144534&direct=mobile" target="_blank" rel="noopener noreferrer" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-xl font-bold border border-slate-700 transition">
+                            2026 항공보안주간 ↗
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-7 space-y-4 text-slate-300 text-xs sm:text-sm leading-relaxed">
+                        <p>
+                            인천국제공항공사는 2026년 8월 19일 을지연습의 일환으로 육군 3경비단, 공항경찰단 등과 함께 <strong>'합동 드론테러 대응훈련'</strong>을 실시했습니다. 
+                            공항 관제권(반경 9.3km) 내 침투한 불법 드론을 탐지 레이더로 포착하고, <strong>드론 재밍건(Jamming Gun)</strong>으로 전파 교란 강제 착륙시켰습니다.
+                        </p>
+                        <div class="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-2">
+                            <p class="font-bold text-orange-400">🤖 사족보행로봇(Four-legged Robot) 최초 실전 투입!</p>
+                            <p class="text-slate-300">무력화된 불법 드론의 폭발물 탑재 여부를 수색하기 위해 사족보행로봇이 위험 지역에 선제 진입하여 정찰 업무를 성공적으로 완수했습니다.</p>
+                        </div>
+                        <p>
+                            또한 국토교통부 '2026 항공보안주간'을 통해 <strong>AI 양방향 3D X-ray 검색기</strong> 및 <strong>고정형 비접촉 폭발물 탐지기(ETD, PPT 1조분의 1 단위 감지)</strong>가 본격 현장에 상용화되고 있습니다.
+                        </p>
+                    </div>
+
+                    <div class="lg:col-span-5 bg-white/5 p-6 rounded-3xl border border-white/10">
+                        <h4 class="text-center font-bold text-slate-300 text-xs uppercase mb-4 tracking-wider">글로벌 항공보안 & 화물검색 시장 전망 ($B)</h4>
+                        <div class="chart-container h-[220px]">
+                            <canvas id="securityMarketChart"></canvas>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-3 text-center">* ICAO GASeP 기준 강화 및 AI CT 검색기 도입으로 연 7.6% 급성장</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4: Ground Staff Practical Guide (Swissport Korea Focus) -->
+        <section class="bg-blue-900 rounded-3xl shadow-xl p-6 sm:p-10 text-white relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="bg-orange-500 text-white font-black text-xs px-3 py-1 rounded-full">SWISSPORT ACTION</span>
+                    <h2 class="text-2xl font-black">스위스포트코리아 지상직 임직원 현장 제언 및 실천 가이드</h2>
+                </div>
+                <p class="text-slate-300 text-sm mb-8 max-w-3xl">
+                    메가 캐리어 출범과 보안 기술 고도화 속에서, 공항 지상 조업 현장의 안전은 스위스포트 임직원 여러분의 세심한 주의와 기본 준수에서 시작됩니다.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Card 1 -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 flex flex-col justify-between">
+                        <div>
+                            <div class="text-orange-400 font-black text-xs mb-2">RAMP & TARMAC</div>
+                            <h4 class="text-lg font-bold mb-3">램프 조업 및 에어사이드</h4>
+                            <ul class="text-xs text-slate-200 space-y-2 leading-relaxed">
+                                • <strong>에어사이드 드론 관찰:</strong> 반경 9.3km 내 미인가 드론 또는 수상한 무인 비행체 포착 시 즉시 통제소(AOC) 및 보안팀 신고.
+                                <br>• <strong>FOD 및 조업 차량 관리:</strong> 폭염/우천 시 GSE 정비 철저 및 타이어/유류 점검.
+                            </ul>
+                        </div>
+                        <span class="text-[10px] text-blue-200 mt-4 block">관련 근거: 인천공항 대테러 훈련 수칙</span>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 flex flex-col justify-between">
+                        <div>
+                            <div class="text-orange-400 font-black text-xs mb-2">CARGO HANDLING</div>
+                            <h4 class="text-lg font-bold mb-3">화물 조업 (Cargo)</h4>
+                            <ul class="text-xs text-slate-200 space-y-2 leading-relaxed">
+                                • <strong>미신고 리튬 배터리 검수:</strong> IATA 경고에 따라 전자상거래(e-Commerce) 화물 내 미신고 Dangerous Goods(DG) 1차 라벨링 완벽 검수.
+                                <br>• <strong>Belly/Freighter 적재:</strong> 초고가 AI 장비 및 반도체 화물 파손 방지 결박 수칙 엄수.
+                            </ul>
+                        </div>
+                        <span class="text-[10px] text-blue-200 mt-4 block">관련 근거: IATA Cargo PLACI 지침</span>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 flex flex-col justify-between">
+                        <div>
+                            <div class="text-orange-400 font-black text-xs mb-2">PASSENGER & SECURITY</div>
+                            <h4 class="text-lg font-bold mb-3">여객 서비스 & 보안</h4>
+                            <ul class="text-xs text-slate-200 space-y-2 leading-relaxed">
+                                • <strong>병목 현상 방지:</strong> 피크 타임 승객 대기줄 효율적 안내 및 스마트패스/비접촉 검색 협조.
+                                <br>• <strong>통합 AOC 안내:</strong> 대한항공-아시아나 통합 관련 승객 문의 시 친절하고 정확한 공식 가이드 전달.
+                            </ul>
+                        </div>
+                        <span class="text-[10px] text-blue-200 mt-4 block">관련 근거: 국토부 항공보안 기본계획</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5: Interactive Q&A Discussion Accordion -->
+        <section class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-100">
+            <h3 class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
+                <span>💡</span> 현장 업무 능력 향상을 위한 Q&A Quiz (클릭하여 확인)
+            </h3>
+
+            <div class="space-y-4">
+                <!-- Q1 -->
+                <div class="border border-slate-200 rounded-2xl p-5 hover:border-blue-400 transition cursor-pointer" onclick="toggleAnswer(this)">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-slate-800 text-sm sm:text-base">Q1. 공항 반경 내 불법 드론 발견 시 조업자가 취해야 할 초동 조치는?</h4>
+                        <span class="text-xs text-blue-600 font-bold toggle-label">답변 보기 ↓</span>
+                    </div>
+                    <div class="answer-content">
+                        <div class="p-4 bg-slate-50 rounded-xl text-xs sm:text-sm text-slate-600 leading-relaxed space-y-1">
+                            <p class="font-bold text-blue-900">✅ 정답 및 행동 가이드:</p>
+                            <p>공항 관제권(반경 9.3km) 이내의 불법 드론은 항공기 이착륙에 치명적 위협이 됩니다. 드론 발견 시 절대 직접 접근하지 말고, <strong>1) 즉시 위치와 비행 방향을 대테러 상황실(032-741-4949) 및 Swissport 보안팀에 신고</strong>하고, <strong>2) 현장 작업 인원에게 상황을 전파</strong>하여 안전구역으로 이동시킵니다. (무단 비행 시 500만 원 이하 벌금 부과 대상)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="border border-slate-200 rounded-2xl p-5 hover:border-blue-400 transition cursor-pointer" onclick="toggleAnswer(this)">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-slate-800 text-sm sm:text-base">Q2. IATA가 강력 경고한 전자상거래 화물 내 최우선 위험 요인은 무엇인가요?</h4>
+                        <span class="text-xs text-blue-600 font-bold toggle-label">답변 보기 ↓</span>
+                    </div>
+                    <div class="answer-content">
+                        <div class="p-4 bg-slate-50 rounded-xl text-xs sm:text-sm text-slate-600 leading-relaxed space-y-1">
+                            <p class="font-bold text-blue-900">✅ 정답 및 행동 가이드:</p>
+                            <p><strong>'미신고 리튬 배터리(Undeclared Lithium Batteries)'</strong>입니다. 최근 폭증하는 이커머스 화물에 승인되지 않은 배터리가 포함될 경우 화재 위험성 파악이 어렵습니다. 스위스포트 화물 조업팀은 화물 접수 시 사전화물정보(PLACI) 시스템 확인 및 X-ray 검색 중 이상 징후 포착 시 위험물(DG) 전담자에게 즉시 이관해야 합니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="border border-slate-200 rounded-2xl p-5 hover:border-blue-400 transition cursor-pointer" onclick="toggleAnswer(this)">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-slate-800 text-sm sm:text-base">Q3. 대한항공-아시아나 통합(12월 17일)에 대응하는 스위스포트의 준비 자세는?</h4>
+                        <span class="text-xs text-blue-600 font-bold toggle-label">답변 보기 ↓</span>
+                    </div>
+                    <div class="answer-content">
+                        <div class="p-4 bg-slate-50 rounded-xl text-xs sm:text-sm text-slate-600 leading-relaxed space-y-1">
+                            <p class="font-bold text-blue-900">✅ 정답 및 행동 가이드:</p>
+                            <p>양사 합병에 따른 통합 운항증명(AOC) 발급과 노선 재편에 따라 조업 스케줄과 수하물/화물 이동 동선이 변동될 수 있습니다. 항공편 변동 등을 미리 파악하여, <strong>수속 시 안전운항 절차 매뉴얼을 사전 숙지</strong>하고, 여객 카운터 및 램프 현장에서 표준 작업 절차(SOP)를 엄격히 준수합니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reference Links Section -->
+        <section class="bg-slate-50 p-6 rounded-3xl border border-slate-200">
+            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Reference Sources & Fact Check (2026년 8월 리포트 출처)</h4>
+            <div class="flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-slate-600">
+                <a href="https://biz.chosun.com/industry/company/2026/08/12/HKSLH6EJVBC2THRGZA75ROQDBU/" target="_blank" rel="noopener noreferrer" class="hover:underline">• 대한항공·아시아나 합병 최종 결의 (조선비즈)</a>
+                <a href="https://www.kgdm.co.kr/news/articleView.html?idxno=2011475" target="_blank" rel="noopener noreferrer" class="hover:underline">• 인천공항 을지연습 드론테러 훈련 (경기도민일보)</a>
+                <a href="http://www.boannews.com/media/view.asp?idx=144534&direct=mobile" target="_blank" rel="noopener noreferrer" class="hover:underline">• 2026 항공보안주간 (보안뉴스)</a>
+                <a href="https://www.forwarder.kr/bbs/board.php?bo_table=menu6_1_1&wr_id=8792" target="_blank" rel="noopener noreferrer" class="hover:underline">• 글로벌 항공화물 브리핑 (포워더KR)</a>
+                <a href="https://www.energy-news.co.kr/news/articleView.html?idxno=227297" target="_blank" rel="noopener noreferrer" class="hover:underline">• 항공사 상장기업 브랜드평판 (에너지신문)</a>
+                <a href="https://news.kbs.co.kr/news/pc/view/view.do?ncd=8641172&ref=A" target="_blank" rel="noopener noreferrer" class="hover:underline">• 제주공항 상공 비행기 정체 이슈 (KBS)</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-white py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left flex flex-col sm:flex-row justify-between items-center gap-6">
+            <div>
+                <div class="flex items-center justify-center sm:justify-start gap-2 mb-2">
+                    <span class="font-black text-lg tracking-tighter text-white">SWISSPORT KOREA</span>
+                </div>
+                <p class="text-xs text-slate-400">Swissport Korea Ground Handling & Aviation Security Intelligence Report</p>
+                <p class="text-[10px] text-slate-500 mt-1">© 2026 Swissport Korea. All rights reserved. 본 자료는 내부 교육 및 정보 공유용 사보입니다.</p>
+            </div>
+            <div class="text-center sm:text-right">
+                <span class="inline-block bg-slate-800 text-slate-300 text-[10px] px-3 py-1 rounded-full border border-slate-700">Safety & Security First</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts for Audio & Interactive Accordion & Charts -->
+    <script>
+        // Audio Player Controls
+        const audio = document.getElementById('podcastAudio');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+
+        playBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play().catch(e => console.log('Audio play error:', e));
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                audio.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = `${percent}%`;
+                const m = Math.floor(audio.currentTime / 60);
+                const s = Math.floor(audio.currentTime % 60);
+                currentTimeEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            }
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            if (audio.duration) {
+                audio.currentTime = pos * audio.duration;
+            }
+        });
+
+        // Accordion Logic
+        function toggleAnswer(element) {
+            const content = element.querySelector('.answer-content');
+            const label = element.querySelector('.toggle-label');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                label.innerText = '답변 보기 ↓';
+            } else {
+                content.classList.add('open');
+                label.innerText = '답변 닫기 ↑';
+            }
+        }
+
+        // Chart 1: Brand Reputation
+        new Chart(document.getElementById('brandChart'), {
+            type: 'bar',
+            data: {
+                labels: ['대한항공', '한진칼', '아시아나', '제주항공', '진에어'],
+                datasets: [{
+                    label: '브랜드평판지수 (백만)',
+                    data: [21.56, 13.32, 4.30, 2.58, 1.47],
+                    backgroundColor: ['#1E3A8A', '#3B82F6', '#93C5FD', '#F97316', '#FBBF24'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+                    x: { ticks: { font: { size: 10, weight: 'bold' } } }
+                }
+            }
+        });
+
+        // Chart 2: Cargo Route Imbalance
+        new Chart(document.getElementById('cargoRouteChart'), {
+            type: 'bar',
+            data: {
+                labels: ['아시아→미주/유럽 (Fronthaul)', '미주/유럽→아시아 (Backhaul)'],
+                datasets: [{
+                    label: '적재율 (%)',
+                    data: [88, 38],
+                    backgroundColor: ['#059669', '#EF4444'],
+                    borderRadius: 10,
+                    barThickness: 35
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { max: 100, beginAtZero: true, ticks: { callback: v => v + '%' } }
+                }
+            }
+        });
+
+        // Chart 3: Security Market Growth
+        new Chart(document.getElementById('securityMarketChart'), {
+            type: 'line',
+            data: {
+                labels: ['2025년', '2026년', '2028년', '2030년', '2034년(P)'],
+                datasets: [
+                    {
+                        label: '항공보안 서비스 ($B)',
+                        data: [5.62, 6.05, 7.10, 8.20, 9.31],
+                        borderColor: '#FF6B00',
+                        backgroundColor: 'rgba(255, 107, 0, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: '화물 검색 시스템 ($B)',
+                        data: [1.20, 1.29, 1.50, 1.75, 2.10],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'transparent',
+                        borderDash: [5, 5],
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#94A3B8', font: { size: 10 } }
+                    }
+                },
+                scales: {
+                    y: { ticks: { color: '#94A3B8' }, grid: { color: '#334155' } },
+                    x: { ticks: { color: '#94A3B8' }, grid: { display: false } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
