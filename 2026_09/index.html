@@ -1,1 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swissport AirScope - 9·11 테러 25주기 특별 사보</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #F8FAFC; padding-top: 90px; padding-bottom: 120px; -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word; }
+        section { scroll-margin-top: 110px; }
+        .gradient-bg { background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); }
+        .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+        .stat-card { transition: all 0.3s ease; height: 100%; display: flex; flex-direction: column; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .source-tag { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .link-btn { font-size: 11px; font-weight: 700; color: #2563EB; border: 1px solid #BFDBFE; padding: 4px 12px; border-radius: 6px; transition: all 0.2s; background: white; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+        .link-btn:hover { background-color: #EFF6FF; border-color: #3B82F6; }
+        .break-keep { word-break: keep-all; overflow-wrap: break-word; }
+        
+        .floating-header {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            max-width: 1200px;
+            height: 65px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
 
+        /* Podcast Controls Styling */
+        .podcast-controls { display: flex; align-items: center; gap: 10px; flex-grow: 1; max-width: 45%; }
+        .youtube-bar {
+            flex-grow: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            position: relative;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .youtube-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: #ef4444;
+            width: 0%;
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        .answer-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .answer-content.open {
+            max-height: 600px;
+            opacity: 1;
+            margin-top: 15px;
+        }
+
+        .image-caption {
+            background: #F1F5F9;
+            border-left: 4px solid #EF4444;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: #475569;
+            margin-top: 0.75rem;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Floating Top Bar with AI Podcast Player -->
+    <div class="floating-header flex items-center justify-between px-3 sm:px-5">
+        <!-- Left: Logo & AirScope Title -->
+        <div class="flex items-center space-x-2 overflow-hidden flex-shrink-0">
+            <div class="bg-white p-1 rounded shadow-sm flex-shrink-0">
+                <img src="spkLogoNEW.jpg" alt="Swissport Logo" class="h-5 sm:h-6 object-contain" onerror="this.outerHTML='<span class=\'text-blue-900 font-black text-xs px-1\'>SWISSPORT</span>'">
+            </div>
+            <div class="truncate">
+                <h1 class="text-xs sm:text-sm font-black tracking-tighter leading-none text-white truncate">AirScope</h1>
+                <p class="text-[7px] sm:text-[8px] text-red-400 font-bold uppercase tracking-widest mt-0.5 truncate">9·11 테러 25주기</p>
+            </div>
+        </div>
+
+        <!-- Center: Podcast Controls -->
+        <div class="podcast-controls flex items-center gap-2 mx-2 flex-grow max-w-sm sm:max-w-md">
+            <button id="playBtn" class="bg-white/10 p-1.5 sm:p-2 rounded-full hover:bg-white/20 transition flex-shrink-0 cursor-pointer">
+                <svg id="playIcon" class="w-4 h-4 sm:w-5 sm:h-5 fill-current text-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="pauseIcon" class="w-4 h-4 sm:w-5 sm:h-5 fill-current text-white hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <div class="youtube-bar flex-grow" id="progressContainer">
+                <div class="youtube-progress" id="progressBar"></div>
+            </div>
+            <span id="currentTime" class="text-[9px] sm:text-[10px] font-mono text-blue-200 w-8 sm:w-10 flex-shrink-0 text-right">0:00</span>
+        </div>
+
+        <!-- Right: Special Badge -->
+        <div class="bg-red-600/20 border border-red-500/30 px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-xs font-black text-red-400 tracking-wider flex-shrink-0">
+            SPECIAL (2026.09)
+        </div>
+
+        <audio id="podcastAudio">
+            <source src="1.m4a" type="audio/mp4">
+        </audio>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-12">
+
+        <!-- Hero Section -->
+        <section class="mb-8">
+            <div class="gradient-bg rounded-[2.5rem] p-6 sm:p-10 md:p-16 text-white overflow-hidden relative shadow-2xl">
+                <div class="relative z-10 max-w-3xl">
+                    <span class="inline-block px-4 py-1.5 rounded-full bg-red-600 text-[10px] font-black mb-6 tracking-widest uppercase shadow-lg">Special Security Report</span>
+                    <h2 class="text-2xl sm:text-3xl md:text-5xl font-black leading-tight mb-6 break-keep">
+                        9·11 테러 25주기,<br class="hidden sm:inline">작은 확인이 항공보안의 시작입니다.
+                    </h2>
+                    <p class="text-slate-300 text-xs sm:text-sm md:text-lg leading-relaxed font-light break-keep">
+                        2001년 9월 11일 비극의 역사로부터 25년이 지난 오늘, 인천국제공항을 비롯한 전 세계 항공 현장은 첨단 3D CT 검색기와 AI 솔루션으로 무장하고 있습니다. 그러나 보안의 최후의 보루는 결국 현장에 있습니다. BGR 기기 앞에서 승객 한 분, 한 분을 확인하는 바로 당신의 세심한 관찰과 신속한 후속 조치가 항공보안을 지키는 마지막 방어선입니다.
+                    </p>
+                </div>
+                <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none">
+                    <svg width="400" height="400" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: 기억과 추모, 25년이 지난 오늘 -->
+        <section class="bg-white rounded-3xl p-6 sm:p-8 md:p-12 card-shadow border border-slate-100">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-4">
+                    <span class="w-8 sm:w-10 h-1 bg-red-600 flex-shrink-0"></span>
+                    <h2 class="text-xl sm:text-2xl md:text-3xl font-black tracking-tighter text-slate-900">SECTION 1: 기억과 추모, 25년이 지난 오늘</h2>
+                </div>
+                <a href="https://mbiz.heraldcorp.com/article/10865591" target="_blank" class="link-btn">
+                    <span class="source-tag bg-blue-100 text-blue-800">NEWS</span> 헤럴드경제 보도 원문 ↗
+                </a>
+            </div>
+            <div class="space-y-4 text-slate-600 text-sm sm:text-base leading-relaxed break-keep font-medium">
+                <p>
+                    2026년 9월 11일, 미국 뉴욕 그라운드 제로와 펜타곤, 펜실베이니아 샹크스빌에서는 9·11 테러 25주기를 맞이하는 공식 추모식이 거행되었습니다. 25년이라는 세월이 흘렀지만, 그날의 비극이 전 세계 항공업계와 우리의 일상에 남긴 충격은 여전히 선명합니다.
+                </p>
+                <p>
+                    2,983명의 희생자를 기리는 묵념 소리 속에서, 특히 25주기 행사인 올해는 기존 6회의 묵념 외에 현장 수습 및 복구 과정에서 유독물질 노출로 사망한 이들을 기리는 <strong>7번째 묵념</strong>이 새로 추가되었습니다. 항공보안 종사자들이 가슴 깊이 새겨야 할 명제는 바로 "안전은 타협할 수 없는 최우선 가치"라는 사실입니다.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 2: 4개 항공편과 CCTV 증거물 (A, B 사진) -->
+        <section class="bg-white rounded-3xl p-6 sm:p-8 md:p-12 card-shadow border border-slate-100">
+            <div class="flex items-center gap-4 mb-6">
+                <span class="w-8 sm:w-10 h-1 bg-red-600 flex-shrink-0"></span>
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-black tracking-tighter text-slate-900">SECTION 2: 4개 항공편이 남긴 보안의 과제</h2>
+            </div>
+            <div class="space-y-4 text-slate-600 text-sm sm:text-base leading-relaxed break-keep font-medium mb-8">
+                <p>
+                    2001년 9월 11일 아침, 19명의 테러범은 미국 동부의 주요 공항에서 4대의 여객기에 나눠 탑승했습니다. 보스턴에서 출발한 아메리칸 11편과 유나이티드 175편, 워싱턴에서 출발한 아메리칸 77편, 뉴어크에서 출발한 유나이티드 93편은 불과 수십 분 사이에 국가적 재앙의 도구로 변모했습니다.
+                </p>
+            </div>
+
+            <!-- Image A & B Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-8 bg-slate-50 p-4 sm:p-6 rounded-2xl border border-slate-200">
+                <div>
+                    <img src="A.jpg" alt="Mohamed Atta Portland CCTV A" class="w-full h-auto rounded-xl shadow-md object-cover border border-slate-300" onerror="this.src='https://placehold.co/600x400/e2e8f0/475569?text=CCTV+Evidence+A'">
+                    <div class="image-caption">
+                        <strong>[법정 증거물 FO07023] 포틀랜드 국제공항 CCTV 화면 A</strong>
+                        2001년 9월 11일 아침 Portland International Jetport 보안검색대 CCTV 화면으로, Mohamed Atta와 Abdulaziz al-Omari가 검색대를 통과하는 장면입니다. (신원조사 및 프로파일링 회피를 위해 말끔한 정장 차림 착용)
+                    </div>
+                </div>
+                <div>
+                    <img src="B.jpg" alt="Mohamed Atta Portland CCTV B" class="w-full h-auto rounded-xl shadow-md object-cover border border-slate-300" onerror="this.src='https://placehold.co/600x400/e2e8f0/475569?text=CCTV+Evidence+B'">
+                    <div class="image-caption">
+                        <strong>[법정 증거물 FO07023] 포틀랜드 국제공항 CCTV 화면 B</strong>
+                        미국 버지니아 동부지방법원 자카리아스 무사위 재판(United States v. Zacarias Moussaoui)의 검찰 측 증거물로 채택된 공식 사료입니다.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Hazmi 형제 사례 심층 분석 -->
+        <section class="bg-white rounded-3xl p-6 sm:p-8 md:p-12 card-shadow border border-slate-100">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-4">
+                    <span class="w-8 sm:w-10 h-1 bg-red-600 flex-shrink-0"></span>
+                    <h2 class="text-xl sm:text-2xl md:text-3xl font-black tracking-tighter text-slate-900">SECTION 3: 이상징후는 있었지만, 연결되지 않았다</h2>
+                </div>
+                <a href="https://www.0404.go.kr/bbs/safetyNtc/1344507/detail2?ntnCd=69" target="_blank" class="link-btn">
+                    <span class="source-tag bg-orange-100 text-orange-800">NOTICE</span> 외교부 해외안전 공지 ↗
+                </a>
+            </div>
+            <div class="space-y-4 text-slate-600 text-sm sm:text-base leading-relaxed break-keep font-medium">
+                <p>
+                    워싱턴 덜레스 공항에서 아메리칸 77편에 탑승한 알하즈미(Hazmi) 형제의 사례는 오늘날 지상직 직원들에게 매우 중요한 교훈을 줍니다. 수속 당시 항공사 카운터 직원들은 승객의 신분증 미비, 언어 소통 불통, 의심스러운 행동을 인지하고 이들을 직접 '추가 확인 대상(Extra Scrutiny)'으로 지정했습니다. 보안검색대에서도 문형 금속탐지기 경보가 두 차례 발생하여 휴대용 금속 탐지기 및 폭발물 흔적 검사가 수행되었습니다.
+                </p>
+                <p>
+                    그러나 당시의 시스템은 카운터에서 발견된 이상징후를 정보기관의 테러위협 정보와 연결하지 못했고, 체크인 단계에서의 위험 지정 역시 검색대의 정밀 신체 수색으로 유기적으로 이어지지 않았습니다. 하나의 이상징후가 개별적인 조치에 그치고, 이를 전체 보안망의 정보로 연결하지 못했을 때 어떤 결과가 초래될 수 있는지, 9·11 테러는 극명하게 보여주고 있습니다.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 4: Box Cutter 규정과 증거물 C 사진 -->
+        <section class="bg-white rounded-3xl p-6 sm:p-8 md:p-12 card-shadow border border-slate-100">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-4">
+                    <span class="w-8 sm:w-10 h-1 bg-red-600 flex-shrink-0"></span>
+                    <h2 class="text-xl sm:text-2xl md:text-3xl font-black tracking-tighter text-slate-900">SECTION 4: 작은 위해물품이 보여준 보안의 허점</h2>
+                </div>
+                <a href="https://naver.me/FDcIfzBR" target="_blank" class="link-btn">
+                    <span class="source-tag bg-green-100 text-green-800">REF</span> 9·11 테러 이후 부활한 '쌍둥이 빌딩' 영상 클립 ↗
+                </a>
+            </div>
+            <div class="space-y-4 text-slate-600 text-sm sm:text-base leading-relaxed break-keep font-medium mb-8">
+                <p>
+                    당시 테러범들이 사용한 것으로 알려진 박스커터는 당시 FAA 법적 금지 품목(날 길이 4인치 이상)에 직접 해당하지 않았으며, 지침서(COG)상 제한 물품으로 분류되어 있었습니다. 검색 장비는 대형 총기 위주로 맞춰져 있었고, "작은 칼 하나쯤이야"라는 당대의 느슨한 인식이 결합하여 시스템 전체의 허점을 만들어냈습니다.
+                </p>
+            </div>
+
+            <!-- Image C Container -->
+            <div class="max-w-2xl mx-auto my-8 bg-slate-50 p-4 sm:p-6 rounded-2xl border border-slate-200">
+                <img src="C.jpg" alt="Government Exhibit FO08301 - One Box Cutter" class="w-full h-auto rounded-xl shadow-md object-contain border border-slate-300 bg-white" onerror="this.src='https://placehold.co/600x400/e2e8f0/475569?text=Exhibit+C+Box+Cutter'">
+                <div class="image-caption">
+                    <strong>[법정 증거물 FO08301] 검찰 측 제출 박스커터 증거물 사진 (C 사진)</strong>
+                    이 사진은 United States v. Zacarias Moussaoui 재판의 검찰 측 증거물 FO08301, “One box cutter”로 공개된 사진입니다. 노란색 retractable box cutter가 증거봉투에 보관된 모습입니다.<br>
+                    <span class="text-red-600 font-bold mt-1 block">⚠️ 주의: 9/11 테러 당일 항공기 내에서 실제 활용한 실물이라고 사진만으로 단정할 수 없으며, 공범 무사위 재판에서 유사 범행 도구의 정황 입증을 위해 제출된 법정 전시물입니다.</span>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-slate-600 text-sm sm:text-base leading-relaxed break-keep font-medium mt-6">
+                <p>
+                    자카리아스 무사위 재판에 제출된 법정 증거물(FO08301) 속 노란색 박스커터는 우리에게 말해줍니다. 규정의 허점과 현장의 방심이 결합할 때, 아주 작고 일상적인 물건조차 치명적인 위해 도구가 될 수 있다는 사실을 말합니다.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 5: 항공보안 현장 실무자가 지켜야 할 철학 (Interactive Checklist) -->
+        <section class="bg-slate-900 rounded-[2.5rem] p-6 sm:p-10 md:p-14 text-white shadow-2xl relative overflow-hidden">
+            <div class="flex items-center gap-4 mb-8">
+                <span class="w-8 sm:w-10 h-1 bg-red-600 flex-shrink-0"></span>
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-black tracking-tighter text-white">SECTION 5: 항공보안 현장 실무자가 지켜야 할 철학</h2>
+            </div>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed break-keep font-medium mb-8">
+                오늘날 공항 현장은 AI 판독 장비와 3D CT 검색기 등 첨단 기술로 무장하고 있습니다. 하지만 보안의 최후의 보루는 여전히 사람, 즉 현장에서 승객을 맞이하고 수속을 처리하는 지상직 직원 여러분입니다. 아래 핵심 행동 수칙을 클릭하여 상세 지침을 확인하십시오.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Checklist Card 1 -->
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-red-400 font-black text-xs uppercase tracking-widest">Rule 01</span>
+                        <span class="text-xs text-blue-300 font-bold">상세 내용 보기 ↓</span>
+                    </div>
+                    <h4 class="text-base sm:text-lg font-black text-white mb-2 break-keep">체크인 카운터 신원 확인의 철저성</h4>
+                    <p class="text-xs sm:text-sm text-slate-300 font-medium break-keep">승객의 사진 신분증 불일치, 서류 미비, 언어 소통 거부 등 미세한 이상징후를 무심코 넘기지 마십시오.</p>
+                    <div class="answer-content">
+                        <div class="p-4 bg-white/5 rounded-xl border border-white/10 text-xs text-slate-200 leading-relaxed space-y-2 break-keep">
+                            <p class="font-bold text-red-400">💡 실무 가이드</p>
+                            • 여권 및 신분증 사진과 실물 대조 필수<br>
+                            • 발권 과정에서의 태도 이상 및 불안 징후 메모<br>
+                            • 업무 지연 방지보다 안전 확인이 우선
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checklist Card 2 -->
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-red-400 font-black text-xs uppercase tracking-widest">Rule 02</span>
+                        <span class="text-xs text-blue-300 font-bold">상세 내용 보기 ↓</span>
+                    </div>
+                    <h4 class="text-base sm:text-lg font-black text-white mb-2 break-keep">이상징후 인지 시 정밀 확인 및 에스컬레이션</h4>
+                    <p class="text-xs sm:text-sm text-slate-300 font-medium break-keep">카운터나 안내대에서 이상징후가 감지되면 즉시 상급자 및 보안 담당 부서에 보고하십시오.</p>
+                    <div class="answer-content">
+                        <div class="p-4 bg-white/5 rounded-xl border border-white/10 text-xs text-slate-200 leading-relaxed space-y-2 break-keep">
+                            <p class="font-bold text-red-400">💡 실무 가이드</p>
+                            • 지침에 따른 신속한 보고 체계 가동<br>
+                            • 보안팀과의 즉각적인 정보 공유<br>
+                            • 단독 판단으로 상황 종료 금지
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checklist Card 3 -->
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-red-400 font-black text-xs uppercase tracking-widest">Rule 03</span>
+                        <span class="text-xs text-blue-300 font-bold">상세 내용 보기 ↓</span>
+                    </div>
+                    <h4 class="text-base sm:text-lg font-black text-white mb-2 break-keep">추가검색 후속 조치 매칭의 완결성</h4>
+                    <p class="text-xs sm:text-sm text-slate-300 font-medium break-keep">금속탐지기 경보 발생 시 휴대형 금속 탐지기, ETD 검사 등 2차 추가검색이 원인 해소까지 완벽히 수행되었는지 확인하십시오.</p>
+                    <div class="answer-content">
+                        <div class="p-4 bg-white/5 rounded-xl border border-white/10 text-xs text-slate-200 leading-relaxed space-y-2 break-keep">
+                            <p class="font-bold text-red-400">💡 실무 가이드</p>
+                            • 경보 발생 원인의 철저한 규명<br>
+                            • 수하물 개장검사 및 흔적 탐지 완결<br>
+                            • 절차 누락 여부 최종 점검
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checklist Card 4 -->
+                <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-red-400 font-black text-xs uppercase tracking-widest">Rule 04</span>
+                        <span class="text-xs text-blue-300 font-bold">상세 내용 보기 ↓</span>
+                    </div>
+                    <h4 class="text-base sm:text-lg font-black text-white mb-2 break-keep">단계 간 정보 공유 및 연계(Connectivity)</h4>
+                    <p class="text-xs sm:text-sm text-slate-300 font-medium break-keep">체크인 단계의 위험 인자가 검색대 및 탑승구(Gate) 단계까지 끊김 없이 전달되어야 합니다.</p>
+                    <div class="answer-content">
+                        <div class="p-4 bg-white/5 rounded-xl border border-white/10 text-xs text-slate-200 leading-relaxed space-y-2 break-keep">
+                            <p class="font-bold text-red-400">💡 실무 가이드</p>
+                            • 부서 간 사각지대 없는 정보 연계<br>
+                            • 탑승구 직전 최종 확인 프로세스 준수<br>
+                            • 작은 특이사항도 철저히 인계
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Quote Banner inside Section 5 -->
+            <div class="mt-12 bg-blue-950/80 border border-blue-500/30 p-6 sm:p-8 rounded-2xl text-center shadow-inner">
+                <p class="text-base sm:text-lg md:text-xl font-black italic text-blue-200 leading-relaxed break-keep">
+                    "9·11이 우리에게 남긴 가장 준엄한 교훈은, 체크인 카운터와 검색대에서 발견한 ​작은 이상징후 하나라도 가볍게 넘기지 않고 끝까지 확인하는 것입니다. 현장의 작은 의심과 신중한 확인이 수백 명의 승객의 생명과 항공안전을 지키는 첫 번째 방어선이 될 수 있습니다."
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-white py-12 text-center text-xs border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 space-y-3">
+            <p class="font-bold text-slate-400 tracking-widest uppercase text-[10px] sm:text-xs">© 2026 SWISSPORT KOREA - SPECIAL AVIATION SECURITY REPORT</p>
+            <p class="text-slate-500 text-[10px] sm:text-xs max-w-2xl mx-auto break-keep">본 자료는 9·11 테러 25주기를 맞아 항공보안 경각심 고취 및 현장 실무 이행력 강화를 위해 제작된 내부 배포용 인포그래픽입니다.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Audio Player Logic
+        const audio = document.getElementById('podcastAudio');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+
+        audio.onerror = () => { console.warn("Podcast audio file (1.m4a) not found."); };
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (audio.paused) {
+                audio.play().catch(e => {});
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                audio.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            if (isFinite(audio.duration) && audio.duration > 0) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = `${percent}%`;
+                currentTimeEl.innerText = formatTime(audio.currentTime);
+            }
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickPos = (e.clientX - rect.left) / rect.width;
+            if (isFinite(audio.duration) && audio.duration > 0) {
+                audio.currentTime = clickPos * audio.duration;
+            }
+        });
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Accordion Toggle Logic
+        function toggleAnswer(element) {
+            const content = element.querySelector('.answer-content');
+            const label = element.querySelector('.text-xs.text-blue-300');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                label.innerText = "상세 내용 보기 ↓";
+            } else {
+                content.classList.add('open');
+                label.innerText = "접기 ↑";
+            }
+        }
+    </script>
+</body>
+</html>
