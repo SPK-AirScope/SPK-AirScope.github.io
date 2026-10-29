@@ -67,7 +67,7 @@
             color: #1E40AF;
         }
 
-        /* Floating Top Bar */
+        /* Floating Top Bar - Mobile Responsive Refinement */
         .floating-header {
             position: fixed;
             top: 12px;
@@ -75,7 +75,7 @@
             transform: translateX(-50%);
             width: 94%;
             max-width: 1240px;
-            height: 62px;
+            min-height: 58px;
             background: rgba(15, 23, 42, 0.92);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -84,7 +84,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
+            padding: 8px 16px;
             color: white;
             box-shadow: 0 10px 30px rgba(0,0,0,0.25);
         }
@@ -93,9 +93,9 @@
         .podcast-controls { 
             display: flex; 
             align-items: center; 
-            gap: 12px; 
+            gap: 10px; 
             flex-grow: 1; 
-            max-width: 58%; 
+            max-width: 65%; 
         }
         .youtube-bar {
             flex-grow: 1;
@@ -133,11 +133,11 @@
         /* Date Badge */
         .date-badge {
             background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
-            padding: 5px 14px;
+            padding: 5px 12px;
             border-radius: 12px;
             font-weight: 900;
-            font-size: 13px;
-            letter-spacing: 1px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
             white-space: nowrap;
         }
@@ -155,11 +155,11 @@
 <body class="antialiased selection:bg-red-500 selection:text-white">
 
     <!-- Floating Header & Audio Player -->
-    <div class="floating-header">
+    <div class="floating-header flex-row items-center gap-2">
         <div class="podcast-controls">
-            <div class="flex items-center gap-2">
-                <span class="text-[10px] font-black uppercase tracking-wider text-red-400 bg-red-950/80 px-2 py-0.5 rounded border border-red-500/30">AI Podcast</span>
-                <button id="playBtn" class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition focus:outline-none focus:ring-2 focus:ring-red-400">
+            <div class="flex items-center gap-1.5 shrink-0">
+                <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-red-400 bg-red-950/80 px-1.5 sm:px-2 py-0.5 rounded border border-red-500/30">AI Podcast</span>
+                <button id="playBtn" class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition focus:outline-none focus:ring-2 focus:ring-red-400 min-w-[36px] min-h-[36px] flex items-center justify-center">
                     <svg id="playIcon" class="w-4 h-4 fill-current text-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     <svg id="pauseIcon" class="w-4 h-4 fill-current text-white hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
@@ -167,11 +167,11 @@
             <div class="youtube-bar" id="progressContainer">
                 <div class="youtube-progress" id="progressBar"></div>
             </div>
-            <span id="currentTime" class="text-[11px] font-mono text-slate-300 w-10 text-right">0:00</span>
+            <span id="currentTime" class="text-[10px] sm:text-[11px] font-mono text-slate-300 w-8 sm:w-10 text-right shrink-0">0:00</span>
         </div>
 
-        <div class="flex items-center gap-3">
-            <div class="hidden sm:block text-right">
+        <div class="flex items-center gap-2 shrink-0">
+            <div class="hidden md:block text-right">
                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Swissport Monthly</p>
                 <p class="text-xs font-black text-white">AirScope Intelligence</p>
             </div>
@@ -190,22 +190,22 @@
         <div class="flex items-center space-x-4">
             <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center">
                 <!-- Company Logo with Fallback -->
-                <img src="spkLogoNEW.jpg" alt="Swissport Logo" class="h-10 object-contain" onerror="this.outerHTML='<span class=\'text-blue-900 font-black text-xl px-2\'>SWISSPORT</span>'">
+                <img src="spkLogoNEW.jpg" alt="Swissport Logo" class="h-9 sm:h-10 object-contain" onerror="this.outerHTML='<span class=\'text-blue-900 font-black text-xl px-2\'>SWISSPORT</span>'">
             </div>
             <div>
                 <div class="flex items-center gap-2">
                     <h1 class="text-2xl font-black tracking-tight text-slate-900">AirScope</h1>
                     <span class="bg-red-100 text-red-700 text-[10px] font-extrabold px-2 py-0.5 rounded uppercase">Internal Security Brief</span>
                 </div>
-                <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-0.5">Aviation Security & Operational Risk Intelligence Report</p>
+                <p class="text-[11px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mt-0.5">Aviation Security & Operational Risk Intelligence Report</p>
             </div>
         </div>
-        <div class="text-left sm:text-right bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+        <div class="text-left sm:text-right bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
             <div class="text-left">
                 <p class="text-[11px] text-slate-400 font-semibold">발행처: 스위스포트코리아 총무보안팀</p>
                 <p class="text-xs font-bold text-slate-800">2026년 10월 심층 항공보안 리포트</p>
             </div>
-            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-red-50 text-red-600 font-black text-xs border border-red-100">
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-red-50 text-red-600 font-black text-xs border border-red-100 shrink-0">
                 10월
             </span>
         </div>
@@ -214,7 +214,7 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
 
         <!-- Executive Hero Banner -->
-        <section class="gradient-bg rounded-3xl shadow-2xl p-8 sm:p-10 text-white relative overflow-hidden border border-slate-800">
+        <section class="gradient-bg rounded-3xl shadow-2xl p-6 sm:p-10 text-white relative overflow-hidden border border-slate-800">
             <div class="absolute -right-12 -bottom-12 w-96 h-96 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute right-1/3 -top-12 w-64 h-64 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
             
@@ -299,7 +299,7 @@
                     </div>
                     <h3 class="text-2xl font-black text-slate-900">국내 공항 보안검색 장비의 공급망 안보 구멍과 반입금지 물품 미적발</h3>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                     <a href="https://www.yna.co.kr/view/AKR20261022103000004" target="_blank" class="link-btn">X-ray 중국산 기사 ↗</a>
                     <a href="https://www.ccdn.co.kr/news/articleView.html?idxno=1106284" target="_blank" class="link-btn">미적발 73건 기사 ↗</a>
                 </div>
@@ -348,7 +348,7 @@
                         국토교통부 ‘공항안전관리단’ 신설 및 관제 체계 일원화
                     </h3>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                     <a href="https://mobile.newsis.com/view/NISX20261020_0003832744" target="_blank" class="link-btn">조직개편 뉴시스 ↗</a>
                     <a href="https://www.law.go.kr/LSW//admRulInfoP.do?admRulSeq=2100000286494&chrClsCd=010201" target="_blank" class="link-btn">의무·자율보고 고시 ↗</a>
                 </div>
@@ -367,7 +367,7 @@
                         <p class="font-bold text-blue-900 text-xs sm:text-sm">📌 개정 『항공안전 의무보고 및 자율보고 요령』 (고시 제2026-537호)</p>
                         <p class="text-slate-700 text-xs">
                             • <strong>의무보고:</strong> 지상조업자(중량·균형관리, 유도업무 수행자)는 안전장애 인지 시 72~96시간 내 전용 시스템(<a href="https://www.esky.go.kr/" target="_blank" class="text-blue-600 font-bold underline">esky.go.kr</a>) 제출.<br/>
-                            • <strong>자율보고:</strong> 조업사 임직원 및 전 국민으로 대상 확대. 모바일(<a href="https://www.whistle.or.kr/" target="_blank" class="text-blue-600 font-bold underline">https://www.whistle.or.kr/</a>) 신속 제보 가능.
+                            • <strong>자율보고:</strong> 조업사 임직원 및 전 국민으로 대상 확대. 모바일(<a href="https://www.whistle.or.kr/" target="_blank" class="text-blue-600 font-bold underline">whistle.or.kr</a>) 신속 제보 가능.
                         </p>
                     </div>
                 </div>
@@ -388,7 +388,7 @@
                                 <td class="py-2 text-slate-300">ICAO 비행장 평가 대응 & 공항 재난 대책 수립</td>
                             </tr>
                             <tr>
-                                <td class="py-2 font-bold font-semibold">지방항공청 공항안전국</td>
+                                <td class="py-2 font-bold">지방항공청 공항안전국</td>
                                 <td class="py-2 text-slate-300">현장 공항 시설·운영 안전 감독 기능 대폭 강화</td>
                             </tr>
                             <tr>
