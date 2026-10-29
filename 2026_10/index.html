@@ -1,1 +1,678 @@
-1
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swissport AirScope - 2026년 10월호 항공 보안 및 산업 동향 리포트</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Noto Sans KR', 'Inter', sans-serif; 
+            background-color: #F8FAFC; 
+            padding-top: 85px; 
+            color: #0F172A;
+            word-break: keep-all;
+        }
+        .gradient-bg { 
+            background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #1E40AF 100%); 
+        }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 550px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 250px; 
+        }
+        .stat-card { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+        }
+        .stat-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 16px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04); 
+        }
+        .source-tag { 
+            font-size: 10px; 
+            font-weight: 800; 
+            padding: 3px 10px; 
+            border-radius: 6px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+        .link-btn { 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: #1D4ED8; 
+            border: 1px solid #BFDBFE; 
+            padding: 4px 12px; 
+            border-radius: 8px; 
+            transition: all 0.2s; 
+            background: #FFFFFF; 
+            white-space: nowrap; 
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .link-btn:hover { 
+            background-color: #EFF6FF; 
+            border-color: #3B82F6; 
+            color: #1E40AF;
+        }
+
+        /* Floating Top Bar */
+        .floating-header {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 94%;
+            max-width: 1240px;
+            height: 62px;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        /* Audio Player Bar */
+        .podcast-controls { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            flex-grow: 1; 
+            max-width: 58%; 
+        }
+        .youtube-bar {
+            flex-grow: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+            border-radius: 3px;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .youtube-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: #EF4444;
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        /* Accordion Interactive Animation */
+        .answer-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.3s ease, margin-top 0.3s ease;
+            opacity: 0;
+        }
+        .answer-content.open {
+            max-height: 600px;
+            opacity: 1;
+            margin-top: 16px;
+        }
+
+        /* Date Badge */
+        .date-badge {
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+            padding: 5px 14px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 13px;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            white-space: nowrap;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-red-500 selection:text-white">
+
+    <!-- Floating Header & Audio Player -->
+    <div class="floating-header">
+        <div class="podcast-controls">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black uppercase tracking-wider text-red-400 bg-red-950/80 px-2 py-0.5 rounded border border-red-500/30">AI Podcast</span>
+                <button id="playBtn" class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition focus:outline-none focus:ring-2 focus:ring-red-400">
+                    <svg id="playIcon" class="w-4 h-4 fill-current text-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIcon" class="w-4 h-4 fill-current text-white hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+            </div>
+            <div class="youtube-bar" id="progressContainer">
+                <div class="youtube-progress" id="progressBar"></div>
+            </div>
+            <span id="currentTime" class="text-[11px] font-mono text-slate-300 w-10 text-right">0:00</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="hidden sm:block text-right">
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Swissport Monthly</p>
+                <p class="text-xs font-black text-white">AirScope Intelligence</p>
+            </div>
+            <div class="date-badge text-white">
+                2026 OCTOBER
+            </div>
+        </div>
+        
+        <audio id="podcastAudio">
+            <source src="1.m4a" type="audio/mp4">
+        </audio>
+    </div>
+
+    <!-- Brand Header -->
+    <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200/80">
+        <div class="flex items-center space-x-4">
+            <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center">
+                <!-- Company Logo with Fallback -->
+                <img src="spkLogoNEW.jpg" alt="Swissport Logo" class="h-10 object-contain" onerror="this.outerHTML='<span class=\'text-blue-900 font-black text-xl px-2\'>SWISSPORT</span>'">
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-black tracking-tight text-slate-900">AirScope</h1>
+                    <span class="bg-red-100 text-red-700 text-[10px] font-extrabold px-2 py-0.5 rounded uppercase">Internal Security Brief</span>
+                </div>
+                <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-0.5">Aviation Security & Operational Risk Intelligence Report</p>
+            </div>
+        </div>
+        <div class="text-left sm:text-right bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div class="text-left">
+                <p class="text-[11px] text-slate-400 font-semibold">발행처: 스위스포트코리아 총무보안팀</p>
+                <p class="text-xs font-bold text-slate-800">2026년 10월 심층 항공보안 리포트</p>
+            </div>
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-red-50 text-red-600 font-black text-xs border border-red-100">
+                10월
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
+
+        <!-- Executive Hero Banner -->
+        <section class="gradient-bg rounded-3xl shadow-2xl p-8 sm:p-10 text-white relative overflow-hidden border border-slate-800">
+            <div class="absolute -right-12 -bottom-12 w-96 h-96 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute right-1/3 -top-12 w-64 h-64 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="relative z-10 max-w-4xl">
+                <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 text-red-300 text-xs font-bold mb-4">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                    복합 위협(Complex Disasters) 시대의 항공 안보 패러다임
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-black tracking-tight leading-tight mb-4 text-white">
+                    지정학적 군사 타격 현실화와<br class="hidden sm:inline"/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-amber-300 to-blue-200">공급망 안보·정부 제도 개혁의 전격 실행</span>
+                </h2>
+                <p class="text-sm sm:text-base text-slate-300 font-medium leading-relaxed mb-6">
+                    2026년 10월 글로벌 항공업계는 예멘 후티 반군의 사우디 민간 공항(리야드·담맘) 직접 타격이라는 전대미문의 위협에 직면했습니다. 
+                    국내적으로는 국정감사를 통해 공항 X-ray 검색장비의 특정국(중국 N사 91.6%) 독점과 사이버 백도어 리스크, 73건의 반입금지 물품 통과 사고가 도마 위에 올랐습니다. 
+                    이에 정부는 국토교통부 내 '공항안전관리단' 신설과 관제 일원화, 항공안전 자율보고 채널 확대를 강도 높게 추진하고 있습니다.
+                </p>
+
+                <!-- Metric Cards Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">지방공항 중국산 X-ray</p>
+                        <p class="text-xl font-black text-red-400 mt-1">91.6%</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">최근 4년 60대 중 55대</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">인천공항 안보위해물품</p>
+                        <p class="text-xl font-black text-amber-300 mt-1">2,243건</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">최근 5년 적발 실적</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">검색대 미적발 통과</p>
+                        <p class="text-xl font-black text-red-400 mt-1">73건</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">실탄·칼 등 기내 유입</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                        <p class="text-[11px] text-slate-300 font-bold">관제 인력 일원화</p>
+                        <p class="text-xl font-black text-blue-300 mt-1">366명</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">항공교통본부 통합 배치</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Executive Summary -->
+        <section class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border-l-[10px] border-red-600">
+            <h3 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-2">
+                <span class="text-red-600">■</span> 10월 핵심 요약: 3대 안보 축과 지상조업의 과제
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-600 font-medium text-sm sm:text-base leading-relaxed">
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
+                    <span class="bg-red-100 text-red-800 text-[10px] font-black px-2.5 py-1 rounded uppercase block w-fit mb-2">공급망 & 사이버 안보</span>
+                    <h4 class="font-bold text-slate-900 mb-1">장비 안보 리스크 및 적발률 강화</h4>
+                    <p class="text-xs sm:text-sm text-slate-600">
+                        국감에서 지적된 중국산 X-ray 검색장비의 통신 차단 및 SW 검증 의무화에 발맞추어, 지상조업 현장 단말기 및 IT 장비의 백도어 방지 수칙 준수가 시급합니다.
+                    </p>
+                </div>
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
+                    <span class="bg-blue-100 text-blue-800 text-[10px] font-black px-2.5 py-1 rounded uppercase block w-fit mb-2">정부 조직 & 보고 체계</span>
+                    <h4 class="font-bold text-slate-900 mb-1">공항안전관리단 신설 및 자율보고</h4>
+                    <p class="text-xs sm:text-sm text-slate-600">
+                        12월 ICAO 평가(USAP-CMA) 대비 국토부 감독 조직 개편 및 개정된 안전·보안 자율보고 시스템(<a href="https://www.whistle.or.kr/" target="_blank" class="text-blue-600 underline font-bold">whistle.or.kr</a>) 활성화가 시작됩니다.
+                    </p>
+                </div>
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
+                    <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2.5 py-1 rounded uppercase block w-fit mb-2">지정학 & 통합 표준</span>
+                    <h4 class="font-bold text-slate-900 mb-1">중동 분쟁과 'One Standard'</h4>
+                    <p class="text-xs sm:text-sm text-slate-600">
+                        중동 민간 공항 피격으로 글로벌 노선 차질이 발생함과 동시에, 국적 항공사의 합병 통합 보안 절차(One Standard) 정착 노력이 속도를 내고 있습니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Audit Analysis & Charts -->
+        <section class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-100">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="source-tag bg-red-100 text-red-800">2026 국정감사 이슈</span>
+                        <span class="text-xs text-slate-400 font-semibold">10월 22일 국회 국토교통위원회</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-900">국내 공항 보안검색 장비의 공급망 안보 구멍과 반입금지 물품 미적발</h3>
+                </div>
+                <div class="flex gap-2">
+                    <a href="https://www.yna.co.kr/view/AKR20261022103000004" target="_blank" class="link-btn">X-ray 중국산 기사 ↗</a>
+                    <a href="https://www.ccdn.co.kr/news/articleView.html?idxno=1106284" target="_blank" class="link-btn">미적발 73건 기사 ↗</a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-6 space-y-4 text-slate-600 font-medium text-sm sm:text-base leading-relaxed">
+                    <div class="bg-red-50 p-4 rounded-2xl border-l-4 border-red-600 text-slate-800">
+                        <p class="font-bold text-red-950 text-sm sm:text-base">"지방공항 소형 X-ray 91.6% 중국산... 미 상무부·리투아니아 우려 장비 독점"</p>
+                    </div>
+                    <p>
+                        한국공항공사가 김포 및 지방공항에 최근 4년간 도입한 소형 X-ray 검색장비 60대 중 <strong>55대(91.6%)</strong>가 중국 N사 제품으로 나타났습니다. 전체 보유량(233대) 중에서도 125대(53.6%)를 차지합니다. 국토부 성능인증을 받은 국내업체 대비 반값에 불과한 저가 입찰 구조 때문입니다.
+                    </p>
+                    <p>
+                        미 상무부의 공급망 배제 조치 및 도·감청, 해킹 데이터 유출 우려가 국감에서 집중 지적되었으며, 향후 10년간 교체 예정인 238대 장비에 대해 <strong>외부 통신 차단 및 SW 자체 검증 평가</strong> 도입이 의무화될 전망입니다.
+                    </p>
+                    <p>
+                        더불어 2021년부터 2026년 9월까지 실탄, 칼 등 반입금지 물품이 무사 통과된 사례가 <strong>73건</strong> 발생하여 현장 검색 인적 요소(Human Factor) 판독 역량 강화 및 과태료 상향 법안 개정이 추진 중입니다.
+                    </p>
+                </div>
+
+                <!-- Interactive Visual Charts -->
+                <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <h4 class="text-center font-bold text-slate-800 text-xs uppercase mb-2">지방공항 최근 4년 X-ray 제조국 비중</h4>
+                        <div class="chart-container h-[200px]">
+                            <canvas id="xrayOriginChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <h4 class="text-center font-bold text-slate-800 text-xs uppercase mb-2">인천공항 안보위해물품 vs 미적발</h4>
+                        <div class="chart-container h-[200px]">
+                            <canvas id="securityFailureChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: MOLIT Policy & Restructuring -->
+        <section class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-100">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                <div>
+                    <span class="source-tag bg-blue-100 text-blue-800">정부 정책 & 제도 개편</span>
+                    <h3 class="text-2xl font-black text-slate-900 mt-1">
+                        국토교통부 ‘공항안전관리단’ 신설 및 관제 체계 일원화
+                    </h3>
+                </div>
+                <div class="flex gap-2">
+                    <a href="https://mobile.newsis.com/view/NISX20261020_0003832744" target="_blank" class="link-btn">조직개편 뉴시스 ↗</a>
+                    <a href="https://www.law.go.kr/LSW//admRulInfoP.do?admRulSeq=2100000286494&chrClsCd=010201" target="_blank" class="link-btn">의무·자율보고 고시 ↗</a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Text Narrative -->
+                <div class="lg:col-span-7 space-y-4 text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    <p>
+                        국토교통부는 오는 12월 예정된 <strong>ICAO 항공안전 평가(USAP-CMA 및 GASeP)</strong>에 전면 대비하고 공항 감독 기능을 강화하기 위해 조직 개편을 단행했습니다. 항공정책실 내 <strong>‘공항안전관리단’</strong>을 전격 신설하고 지방항공청(서울·부산)에 '공항안전국', 제주청에 '공항안전과'를 구축했습니다.
+                    </p>
+                    <p>
+                        또한 분산되어 있던 관제 기능을 책임운영기관인 <strong>‘항공교통본부’</strong>로 일원화하여 관제 인력 366명을 통합 배치함으로써 관제 안전의 단일성을 확보했습니다.
+                    </p>
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-200 space-y-2">
+                        <p class="font-bold text-blue-900 text-xs sm:text-sm">📌 개정 『항공안전 의무보고 및 자율보고 요령』 (고시 제2026-537호)</p>
+                        <p class="text-slate-700 text-xs">
+                            • <strong>의무보고:</strong> 지상조업자(중량·균형관리, 유도업무 수행자)는 안전장애 인지 시 72~96시간 내 전용 시스템(<a href="https://www.esky.go.kr/" target="_blank" class="text-blue-600 font-bold underline">esky.go.kr</a>) 제출.<br/>
+                            • <strong>자율보고:</strong> 조업사 임직원 및 전 국민으로 대상 확대. 모바일(<a href="https://www.whistle.or.kr/" target="_blank" class="text-blue-600 font-bold underline">https://www.whistle.or.kr/</a>) 신속 제보 가능.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Structured Table -->
+                <div class="lg:col-span-5 bg-slate-900 text-white p-5 rounded-2xl custom-scrollbar overflow-x-auto">
+                    <h4 class="text-xs font-black text-amber-400 uppercase tracking-wider mb-3">국토교통부 항공 행정 조직 개편 요약</h4>
+                    <table class="w-full text-left text-xs min-w-[280px]">
+                        <thead>
+                            <tr class="border-b border-slate-700 text-slate-400">
+                                <th class="pb-2">구분</th>
+                                <th class="pb-2">개편 후 주요 역할</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-200">
+                            <tr>
+                                <td class="py-2 font-bold text-amber-300">공항안전관리단 (신설)</td>
+                                <td class="py-2 text-slate-300">ICAO 비행장 평가 대응 & 공항 재난 대책 수립</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 font-bold font-semibold">지방항공청 공항안전국</td>
+                                <td class="py-2 text-slate-300">현장 공항 시설·운영 안전 감독 기능 대폭 강화</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 font-bold text-blue-300">항공교통본부 일원화</td>
+                                <td class="py-2 text-slate-300">관제 인력 366명 통합 배치 및 관제 단일화</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Industry & Geopolitical Trends Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Industry Trend: 2026 Aviation Security Forum & Korean Air/Asiana -->
+            <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 stat-card border border-slate-100">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="source-tag bg-emerald-100 text-emerald-800">학술·산업 동향</span>
+                    <a href="https://www.boannews.com/news/articleView.html?idxno=146512" target="_blank" class="link-btn">항공보안포럼 ↗</a>
+                </div>
+                
+                <h3 class="text-xl font-black text-slate-900 mb-3 leading-snug">
+                    ‘2026 항공보안포럼’ 개최 & 국적사 통합 ‘One Standard’
+                </h3>
+
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium mb-4">
+                    10월 21일 송도컨벤시아에서 개최된 <strong>'2026 항공보안포럼'</strong>에서는 하이브리드 위협 시대를 맞아 민간 경비 조직을 국가중요시설 방어선으로 육성하는 방안과 안티드론, 내부자 위협(Insider Risk) 관리 방안이 집중 논의되었습니다.
+                </p>
+
+                <div class="space-y-2 mb-4">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-3">
+                        <span class="bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded mt-0.5">통합</span>
+                        <div>
+                            <p class="text-xs font-bold text-slate-800">대한항공·아시아나 '통합 조종사 안전회의' (10/12~11/13)</p>
+                            <p class="text-[11px] text-slate-500">총 22회 공동 개최. 조종실 보안 강화 및 'One Standard' 표준 비행 절차 준수 단일화.</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 flex items-start gap-3">
+                        <span class="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded mt-0.5">ICAO</span>
+                        <div>
+                            <p class="text-xs font-bold text-emerald-900">ICAO Security Week 2026 (카자흐스탄 아스타나)</p>
+                            <p class="text-[11px] text-emerald-700">AI 기반 보안검색 현대화, 분쟁지역 위험 평가, 글로벌 항공보안계획(GASeP) 반영.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Geopolitical Crisis: Saudi Airport Attacks -->
+            <div class="bg-slate-900 text-white rounded-3xl shadow-xl p-6 sm:p-8 stat-card border border-slate-800">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="source-tag bg-red-900/80 text-red-300 border border-red-700">지정학적 안보 위기</span>
+                    <a href="https://www.aninews.in/news/world/middle-east/one-dead-eight-injured-in-attack-on-king-fahd-international-airport-in-saudi-arabias-dammam20261022062316" target="_blank" class="link-btn border-slate-700 bg-slate-800 text-slate-200">담맘 공항 피격 기사 ↗</a>
+                </div>
+
+                <h3 class="text-xl font-black text-white mb-3 leading-snug">
+                    사우디 민간 공항(리야드·담맘) 드론·미사일 직접 타격 사태
+                </h3>
+
+                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium mb-4">
+                    10월 후티 반군에 의해 사우디 리야드 킹 칼리드 공항(10/10, 사망 13명)과 담맘 킹 파드 공항(10/21, 사망 1명·부상 8명)이 연이어 피격당해 공항이 전면 또는 부분 폐쇄되는 대참사가 발생했습니다.
+                </p>
+
+                <div class="space-y-2 mb-4 text-xs">
+                    <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex justify-between items-center">
+                        <span class="font-bold text-red-400">ICAO 이사회 공식 성명 (10/15)</span>
+                        <span class="text-slate-400">민간 인프라 공격 강력 규탄</span>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex justify-between items-center">
+                        <span class="font-bold text-amber-300">글로벌 항공사 운항 중단</span>
+                        <span class="text-slate-400">루프트한자·에어프랑스·에어인디아 11월까지 운항 중단</span>
+                    </div>
+                </div>
+
+                <div class="mt-auto bg-red-950/60 p-3 rounded-xl border border-red-800/60">
+                    <p class="text-[11px] text-red-300 font-bold">미 국무부, 사우디 주재 비비상 정부 직원 대상 '대피령(Ordered Departure)' 발령</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Swissport Tailored Recommendations & Q&A Interactive Accordion -->
+        <section class="bg-gradient-to-br from-blue-900 to-slate-900 rounded-3xl shadow-2xl p-6 sm:p-10 text-white relative overflow-hidden border border-blue-800">
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="p-2.5 bg-red-600 rounded-xl text-white font-black text-sm">SPK</span>
+                    <div>
+                        <h2 class="text-2xl font-black text-white">스위스포트코리아(Swissport Korea) 지상직 눈높이 제언 및 교육 Q&A</h2>
+                        <p class="text-xs text-blue-200 mt-0.5">화물, 램프, 여객, 보안 현장에서 즉시 이행해야 할 3대 실무 행동 가이드</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Question Card 1 -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 flex flex-col justify-between hover:bg-white/15 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                        <div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5">
+                                <span class="bg-red-500/30 text-red-300 border border-red-400/30 text-[10px] font-black px-2.5 py-1 rounded-full whitespace-nowrap shrink-0">Q1. IT & 사이버 보안</span>
+                                <span class="text-[11px] text-blue-300 group-hover:text-white font-bold tracking-tight whitespace-nowrap shrink-0 ml-auto">클릭하여 펼치기 ↓</span>
+                            </div>
+                            <h4 class="text-base font-black text-white mb-2 leading-snug">
+                                공항 검색장비 사이버 이슈 속, 현장 조업용 태블릿/IT 기기 보안 수칙은?
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                중국산 X-ray 백도어 지적 등 사이버 위협 증대에 따른 조업 현장 스마트 단말기 보안 관리 요령입니다.
+                            </p>
+                        </div>
+
+                        <div class="answer-content">
+                            <div class="p-4 bg-slate-950/80 rounded-xl border border-white/10 text-xs text-slate-200 space-y-2">
+                                <p class="font-bold text-red-400">💡 현장 실천 가이드</p>
+                                <p>• <strong>조업 단말기 보안 강화:</strong> 램프 및 화물 터미널용 PDA·태블릿 사용 후 즉시 화면 잠금 설정 및 비인가 외부 Wi-Fi 접속 금지.</p>
+                                <p>• <strong>데이터 분리 & 분실 보고:</strong> 개인 정보 및 화물 데이터를 개인 기기에 무단 저장하지 않으며, 단말기 분실 시 즉시 IT 보안팀에 보고하여 원격 개시 조치.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Card 2 -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 flex flex-col justify-between hover:bg-white/15 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                        <div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5">
+                                <span class="bg-blue-500/30 text-blue-300 border border-blue-400/30 text-[10px] font-black px-2.5 py-1 rounded-full whitespace-nowrap shrink-0">Q2. 자율보고 & Just Culture</span>
+                                <span class="text-[11px] text-blue-300 group-hover:text-white font-bold tracking-tight whitespace-nowrap shrink-0 ml-auto">클릭하여 펼치기 ↓</span>
+                            </div>
+                            <h4 class="text-base font-black text-white mb-2 leading-snug">
+                                개정된 항공안전 자율보고 제도와 현장 'Just Culture' 적용 방법은?
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                불이익 처벌 면제 원칙 기반의 자율적 위험요율 발굴 및 신속 보고 채널 활용법입니다.
+                            </p>
+                        </div>
+
+                        <div class="answer-content">
+                            <div class="p-4 bg-slate-950/80 rounded-xl border border-white/10 text-xs text-slate-200 space-y-2">
+                                <p class="font-bold text-blue-400">💡 현장 실천 가이드</p>
+                                <p>• <strong>처벌 면제 기반 자율 제보:</strong> 실수나 현장 위험 요인 발견 시 불이익을 두려워하지 않고 모바일웹(<a href="https://www.whistle.or.kr/" target="_blank" class="text-blue-300 font-bold underline">whistle.or.kr</a>) 또는 사내 안전보안 채널로 신속 제보.</p>
+                                <p>• <strong>지상조업 위험 요소 공유:</strong> 화물 상하역 시 팰릿 결함, FOD, 출입문 오작동 등을 인지하는 즉시 72시간 내 자율 보고하여 2차 사고 사전 예방.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Card 3 -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 flex flex-col justify-between hover:bg-white/15 transition cursor-pointer group" onclick="toggleAnswer(this)">
+                        <div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5">
+                                <span class="bg-amber-500/30 text-amber-300 border border-amber-400/30 text-[10px] font-black px-2.5 py-1 rounded-full whitespace-nowrap shrink-0">Q3. 드론 & 분쟁지역 대응</span>
+                                <span class="text-[11px] text-blue-300 group-hover:text-white font-bold tracking-tight whitespace-nowrap shrink-0 ml-auto">클릭하여 펼치기 ↓</span>
+                            </div>
+                            <h4 class="text-base font-black text-white mb-2 leading-snug">
+                                사우디 공항 피격 및 드론 위협 속 램프 조업자의 비상 행동요령은?
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                공항 인근 미확인 드론 식별 및 해외 중동 노선 화물·여객 처리 시 비상대응 절차입니다.
+                            </p>
+                        </div>
+
+                        <div class="answer-content">
+                            <div class="p-4 bg-slate-950/80 rounded-xl border border-white/10 text-xs text-slate-200 space-y-2">
+                                <p class="font-bold text-amber-400">💡 현장 실천 가이드</p>
+                                <p>• <strong>초동 드론 제보 체계:</strong> 활주로 및 계류장 주변 미확인 비행체(드론) 목격 시 즉시 종합통제센터(AOC) 및 보안상황실로 위치·방향 제보.</p>
+                                <p>• <strong>중동 노선 화물 정밀 검색:</strong> 지정학적 위협 노선의 화물·수하물에 대한 2차 X-ray 정밀 점검 및 개장 검사 철저 이행으로 기내 반입 위험 차단.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center py-10 text-slate-400 text-[11px] border-t border-slate-200 space-y-2">
+            <p class="font-black text-slate-600 uppercase tracking-widest">© 2026 SWISSPORT KOREA - CONFIDENTIAL SECURITY REPORT</p>
+            <p>본 사보는 임직원의 항공보안 의식 제고 및 직무 교육을 위해 제작된 내부 배포용 웹 리포트입니다.</p>
+            <p class="text-slate-500">Ref Sources: 국토교통부, 한국공항공사, 인천국제공항공사, ICAO, 연합뉴스, 뉴시스, 보안뉴스, AP News</p>
+        </footer>
+    </main>
+
+    <script>
+        // Audio Player Logic
+        const audio = document.getElementById('podcastAudio');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+
+        audio.onerror = () => { 
+            console.warn("Podcast audio file (1.m4a) not found. Controls in preview mode."); 
+        };
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (audio.paused) {
+                audio.play().catch(e => {
+                    console.log("Audio play prevented or file missing");
+                });
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                audio.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            if (isFinite(audio.duration) && audio.duration > 0) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = `${percent}%`;
+                currentTimeEl.innerText = formatTime(audio.currentTime);
+            }
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickPos = (e.clientX - rect.left) / rect.width;
+            if (isFinite(audio.duration) && audio.duration > 0) {
+                audio.currentTime = clickPos * audio.duration;
+            }
+        });
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Accordion Interaction
+        function toggleAnswer(element) {
+            const content = element.querySelector('.answer-content');
+            const label = element.querySelector('span:last-of-type');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                if(label) label.innerText = "클릭하여 펼치기 ↓";
+            } else {
+                content.classList.add('open');
+                if(label) label.innerText = "답변 접기 ↑";
+            }
+        }
+
+        // Chart 1: X-ray Origin Breakdown
+        new Chart(document.getElementById('xrayOriginChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['중국 N사 (91.6%)', '국산 M사 (8.4%)'],
+                datasets: [{
+                    data: [55, 5],
+                    backgroundColor: ['#EF4444', '#3B82F6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 10 } } }
+                }
+            }
+        });
+
+        // Chart 2: 인천공항 안보위해물품 적발 vs 통과
+        new Chart(document.getElementById('securityFailureChart'), {
+            type: 'bar',
+            data: {
+                labels: ['안보위해 적발 (5년)', '검색대 통과 (73건)'],
+                datasets: [{
+                    label: '건수',
+                    data: [2243, 73],
+                    backgroundColor: ['#3B82F6', '#EF4444'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#E2E8F0' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
