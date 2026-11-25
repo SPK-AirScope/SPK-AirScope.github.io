@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swissport AirScope - 2026년 11월호 인포그래픽 사보 (최종안)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #0B132B;
+            color: #F8FAFC;
+            padding-top: 132px;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+            overflow-x: hidden;
+        }
+        @media (min-width: 768px) {
+            body {
+                padding-top: 96px;
+            }
+        }
+        section {
+            scroll-margin-top: 110px;
+        }
+        .hero-grad {
+            background: linear-gradient(135deg, #002F6C 0%, #0F172A 55%, #1E3A8A 100%);
+        }
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 210px;
+        }
+        .card-hover {
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 107, 0, 0.5);
+            box-shadow: 0 18px 32px -12px rgba(0, 0, 0, 0.45);
+        }
+
+        /* Floating Tooltip Link Chip */
+        .tip-wrap {
+            position: relative;
+            display: inline-block;
+        }
+        .link-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #93C5FD;
+            background: rgba(30, 58, 138, 0.35);
+            border: 1px solid rgba(147, 197, 253, 0.25);
+            padding: 5px 10px;
+            border-radius: 999px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .link-chip:hover,
+        .link-chip:focus-visible {
+            background: rgba(37, 99, 235, 0.6);
+            color: #FFFFFF;
+            border-color: #60A5FA;
+            outline: none;
+        }
+        .tip-card {
+            position: fixed;
+            z-index: 9999;
+            width: min(290px, calc(100vw - 24px));
+            background: #0F172A;
+            color: #F8FAFC;
+            border: 1px solid rgba(255, 107, 0, 0.45);
+            border-radius: 14px;
+            padding: 10px 12px;
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.65);
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.16s ease, transform 0.16s ease;
+            text-align: left;
+            white-space: normal;
+        }
+        .tip-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .tip-card .tip-media {
+            font-size: 10px;
+            font-weight: 900;
+            color: #FDBA74;
+            letter-spacing: 0.04em;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .tip-card .tip-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #FFFFFF;
+            line-height: 1.4;
+            display: block;
+        }
+        .tip-card .tip-hint {
+            font-size: 10px;
+            color: #94A3B8;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .acc-body {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+        }
+        .acc-body.open {
+            max-height: 700px;
+            opacity: 1;
+            margin-top: 12px;
+        }
+        .pulse-orange {
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            background: #FF6B00;
+            animation: pulseRing 2s infinite;
+        }
+        @keyframes pulseRing {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(255, 107, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0); }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-orange-500 selection:text-white">
+
+    <!-- Shared Floating Tooltip Popover -->
+    <div id="floatingTip" class="tip-card" role="tooltip" aria-hidden="true">
+        <span class="tip-media" id="tipMedia"></span>
+        <span class="tip-title" id="tipTitle"></span>
+        <span class="tip-hint">클릭 시 새 창에서 기사 열기</span>
+    </div>
+
+    <!-- Fixed Top Navigation & Podcast Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-[#0B132B]/90 backdrop-blur-lg border-b border-white/10">
+        <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2">
+            <!-- Brand & Badge Row -->
+            <div class="flex items-center justify-between gap-2 min-w-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="bg-white px-2 py-1 rounded-lg flex items-center shrink-0">
+                        <img src="spkLogoNEW.jpg" alt="Swissport Logo" class="h-6 sm:h-7 w-auto object-contain" onerror="this.outerHTML='<span class='text-[#002F6C] font-black text-sm px-1'>SWISSPORT</span>'">
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-[10px] font-bold tracking-widest text-slate-400 uppercase block leading-none">Swissport Korea</span>
+                        <span class="text-sm sm:text-base font-black text-white tracking-tight leading-tight">AirScope <span class="text-orange-400">11월호</span></span>
+                    </div>
+                </div>
+                <span class="md:hidden shrink-0 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full tracking-wider">
+                    2026 NOV
+                </span>
+            </div>
+
+            <!-- Podcast Player Row -->
+            <div class="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 w-full md:w-auto md:max-w-md min-w-0">
+                <button id="playBtn" type="button" aria-label="오디오 재생 또는 일시정지" class="w-7 h-7 rounded-full bg-[#FF6B00] hover:bg-orange-600 text-white flex items-center justify-center shrink-0 transition active:scale-95">
+                    <svg id="playIcon" class="w-3.5 h-3.5 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIcon" class="w-3.5 h-3.5 fill-current hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5">
+                        <span class="pulse-orange shrink-0"></span>
+                        <span class="text-[9px] font-black uppercase tracking-wider text-orange-400 truncate">AI Briefing</span>
+                    </div>
+                    <p class="text-[11px] text-slate-200 font-semibold truncate">11월호 핵심 요약</p>
+                </div>
+                <div id="progressContainer" class="hidden sm:block w-20 h-1.5 bg-white/15 rounded-full overflow-hidden cursor-pointer shrink-0">
+                    <div id="progressBar" class="h-full bg-[#FF6B00] w-0 transition-all duration-100"></div>
+                </div>
+                <span id="currentTime" class="text-[10px] font-mono text-slate-400 shrink-0">0:00</span>
+                <audio id="podcastAudio" preload="none">
+                    <source src="1.m4a" type="audio/mp4">
+                </audio>
+            </div>
+
+            <!-- Desktop Right Badge -->
+            <div class="hidden md:flex items-center gap-2 shrink-0">
+                <span class="bg-white/5 border border-white/10 text-slate-300 text-[11px] font-bold px-3 py-1 rounded-full">항공산업 보안동향 리포트</span>
+                <span class="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-black px-3 py-1 rounded-full tracking-wider">2026 NOV</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-3 sm:px-6 pb-16 space-y-8">
+
+        <!-- 1. Hero Visual Banner & Key Infographic KPIs -->
+        <header class="hero-grad rounded-3xl p-5 sm:p-8 md:p-10 border border-white/10 shadow-2xl relative overflow-hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="inline-flex items-center gap-2 bg-white/10 border border-white/15 px-3 py-1 rounded-full text-[11px] font-bold text-orange-300">
+                        <span>✈️</span> 운항 통제 · 현장 대응 · 보안 관리 핵심 동향
+                    </div>
+                    <h1 class="text-2xl sm:text-4xl md:text-[42px] font-black text-white leading-tight tracking-tight">
+                        멈춘 하늘길 <span class="text-orange-400">4시간 25분</span>,<br>
+                        흔들리지 않는 <span class="text-sky-300">현장 Manual 업무 역량</span>
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-2xl">
+                        9·11 이후 두 번째 미 전역 이륙 중단과 12월 2~15일 ICAO 항공안전평가를 앞둔 핵심 포인트를 담았습니다.
+                    </p>
+                </div>
+
+                <!-- Custom SVG Infographic Visual: System Disruption -> Manual & Security Shield -->
+                <div class="lg:col-span-5 bg-slate-950/60 border border-white/10 rounded-2xl p-4">
+                    <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                        <span>Visual Flow</span>
+                        <span class="text-orange-400">Disruption → Manual Shield</span>
+                    </div>
+                    <svg viewBox="0 0 420 175" class="w-full h-auto block" role="img" aria-label="관제 통신 장애 발생 시 수기 확인 및 보호구역 통제 유지 인포그래픽">
+                        <defs>
+                            <linearGradient id="cardBlue" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#1E3A8A" stop-opacity="0.9"/>
+                                <stop offset="100%" stop-color="#0F172A" stop-opacity="0.95"/>
+                            </linearGradient>
+                            <linearGradient id="cardOrange" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#EA580C" stop-opacity="0.9"/>
+                                <stop offset="100%" stop-color="#7C2D12" stop-opacity="0.95"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Step 1 -->
+                        <rect x="8" y="16" width="120" height="142" rx="14" fill="url(#cardOrange)" stroke="#FB923C" stroke-opacity="0.4"/>
+                        <circle cx="68" cy="48" r="16" fill="#FFEDD5" fill-opacity="0.15"/>
+                        <text x="68" y="53" text-anchor="middle" fill="#FDBA74" font-size="14" font-weight="900">01</text>
+                        <text x="68" y="82" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="800">시스템·관제 장애</text>
+                        <text x="68" y="100" text-anchor="middle" fill="#FED7AA" font-size="10">미 전역 4시간 25분</text>
+                        <text x="68" y="114" text-anchor="middle" fill="#FED7AA" font-size="10">이륙 중단 · 적체 급증</text>
+                        <rect x="22" y="128" width="92" height="20" rx="6" fill="#000000" fill-opacity="0.3"/>
+                        <text x="68" y="141" text-anchor="middle" fill="#FDBA74" font-size="9" font-weight="700">절차 생략 주의</text>
+
+                        <!-- Arrow 1 -->
+                        <path d="M134 87 L148 87" stroke="#FDBA74" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M144 82 L150 87 L144 92" fill="none" stroke="#FDBA74" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+                        <!-- Step 2 -->
+                        <rect x="154" y="16" width="114" height="142" rx="14" fill="url(#cardBlue)" stroke="#60A5FA" stroke-opacity="0.4"/>
+                        <circle cx="211" cy="48" r="16" fill="#DBEAFE" fill-opacity="0.15"/>
+                        <text x="211" y="53" text-anchor="middle" fill="#93C5FD" font-size="14" font-weight="900">02</text>
+                        <text x="211" y="82" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="800">메뉴얼 업무 가동</text>
+                        <text x="211" y="100" text-anchor="middle" fill="#BFDBFE" font-size="10">수기 대조 · 탑재 일치</text>
+                        <text x="211" y="114" text-anchor="middle" fill="#BFDBFE" font-size="10">SOP &amp; 점검 기록 유지</text>
+                        <rect x="166" y="128" width="90" height="20" rx="6" fill="#000000" fill-opacity="0.3"/>
+                        <text x="211" y="141" text-anchor="middle" fill="#93C5FD" font-size="9" font-weight="700">절차 생략 금지</text>
+
+                        <!-- Arrow 2 -->
+                        <path d="M274 87 L288 87" stroke="#6EE7B7" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M284 82 L290 87 L284 92" fill="none" stroke="#6EE7B7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+                        <!-- Step 3 -->
+                        <rect x="294" y="16" width="118" height="142" rx="14" fill="#064E3B" fill-opacity="0.85" stroke="#34D399" stroke-opacity="0.45"/>
+                        <circle cx="353" cy="48" r="16" fill="#D1FAE5" fill-opacity="0.15"/>
+                        <text x="353" y="53" text-anchor="middle" fill="#6EE7B7" font-size="14" font-weight="900">03</text>
+                        <text x="353" y="82" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="800">보호구역·현장 안전</text>
+                        <text x="353" y="100" text-anchor="middle" fill="#A7F3D0" font-size="10">출입 통제 · 3D/방사선</text>
+                        <text x="353" y="114" text-anchor="middle" fill="#A7F3D0" font-size="10">신기종·충전 안전 준수</text>
+                        <rect x="306" y="128" width="94" height="20" rx="6" fill="#000000" fill-opacity="0.3"/>
+                        <text x="353" y="141" text-anchor="middle" fill="#6EE7B7" font-size="9" font-weight="700">12월 ICAO 수검 대비</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 4 Compact KPI Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6 pt-6 border-t border-white/10 relative z-10">
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5">
+                    <span class="text-[10px] font-bold text-orange-300 block">11.13 미 이륙 중단</span>
+                    <span class="text-xl sm:text-2xl font-black text-white block mt-0.5">4시간 25분</span>
+                    <span class="text-[10px] text-slate-300">9·11 이후 두 번째 · 100만 명+ 영향</span>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5">
+                    <span class="text-[10px] font-bold text-sky-300 block">ICAO 항공안전평가</span>
+                    <span class="text-xl sm:text-2xl font-black text-white block mt-0.5">12.2~12.15</span>
+                    <span class="text-[10px] text-slate-300">평가단 12명 · 합동 수검대책반</span>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5">
+                    <span class="text-[10px] font-bold text-emerald-300 block">아·북미 항공화물</span>
+                    <span class="text-xl sm:text-2xl font-black text-white block mt-0.5">+17.0%</span>
+                    <span class="text-[10px] text-slate-300">전년 동기 대비 · AI 장비 호조</span>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5">
+                    <span class="text-[10px] font-bold text-amber-300 block">전기 여객기 CE-25A</span>
+                    <span class="text-xl sm:text-2xl font-black text-white block mt-0.5">60.4 km</span>
+                    <span class="text-[10px] text-slate-300">11.14 첫 유인비행 · 19인승</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. Infographic Cards Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+            <!-- Card 1: Main Issue Ground Stop + Chart -->
+            <article class="glass-dark rounded-3xl p-5 card-hover flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-400/30">Main Issue</span>
+                        <span class="text-[11px] text-slate-400 font-semibold">11월 13일</span>
+                    </div>
+                    <h2 class="text-lg font-black text-white leading-snug">미 전역 항공편 이륙 중단 (9·11 이후 2번째)</h2>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        아칸소 관제 통신 설비 오류(외부 해킹·테러 아님)로 약 4시간 25분간 이륙 통제, 100만 명 이상 여객 혼잡 발생. 적체 심화 시 <strong class="text-orange-300">보호구역 출입 통제</strong>와 <strong class="text-orange-300">수동 확인</strong> 유지가 핵심입니다.
+                    </p>
+                    <div class="bg-slate-950/70 rounded-2xl p-3 border border-white/5">
+                        <div class="chart-wrap">
+                            <canvas id="mainMetricsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-1.5 pt-4 mt-4 border-t border-white/10">
+                    <div class="tip-wrap">
+                        <a href="https://www.faa.gov/newsroom/nationwide-ground-stop-questions-and-answers" target="_blank" class="link-chip" data-media="FAA (2026.11.15)" data-title="Nationwide Ground Stop: Questions and Answers">FAA Q&amp;A ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://www.cbc.ca/news/world/faa-airport-ground-stop-routers-installation-halted-9.7425635" target="_blank" class="link-chip" data-media="CBC News (2026.11.17)" data-title="FAA halts installation of new routers linked to Friday's airport ground stop">CBC News ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://m.g-enews.com/article/Industry/2026/11/202611240917167837fda4f5ab74_1" target="_blank" class="link-chip" data-media="글로벌이코노믹 (2026.11.24)" data-title="하늘길 멈춘 5시간의 경고">글로벌이코노믹 ↗</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 2: Airline Chain Delays -->
+            <article class="glass-dark rounded-3xl p-5 card-hover flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30">Flight Ops</span>
+                        <span class="text-[11px] text-slate-400 font-semibold">11월 중순~하순</span>
+                    </div>
+                    <h2 class="text-lg font-black text-white leading-snug">주요 항공사 연쇄 운항 지연</h2>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        정시성 회복 압박 속에서도 탑재 지시서와 실제 화물·수하물 일치 여부를 <strong class="text-sky-300">수기로 재확인</strong>해야 합니다.
+                    </p>
+
+                    <!-- Mini Visual Timeline -->
+                    <div class="space-y-2 pt-1">
+                        <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3">
+                            <span class="text-xs font-black text-sky-300 bg-sky-500/15 px-2.5 py-1 rounded-lg shrink-0">11.17</span>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-white truncate">유나이티드항공 운항 관리 오류</p>
+                                <p class="text-[11px] text-slate-400">약 1시간 30분 지연·취소</p>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3">
+                            <span class="text-xs font-black text-amber-300 bg-amber-500/15 px-2.5 py-1 rounded-lg shrink-0">11.22</span>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-white truncate">델타항공 중량·균형(W&amp;B) 오류</p>
+                                <p class="text-[11px] text-slate-400">애틀랜타 공항 출발 일시 중단</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-1.5 pt-4 mt-4 border-t border-white/10">
+                    <div class="tip-wrap">
+                        <a href="https://www.yna.co.kr/view/AKR20261117032900091" target="_blank" class="link-chip" data-media="연합뉴스 (2026.11.17)" data-title="美유나이티드항공, 시스템 문제로 운항 지연…'보안사고 아냐'">연합뉴스 ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://migflug.com/afterburner/de/delta-weight-and-balance-outage-atlanta-ground-stop-november-2026/" target="_blank" class="link-chip" data-media="MigFlug (2026.11.23)" data-title="Delta Outage: Weight-and-Balance Glitch Triggers Atlanta Ground Stop">MigFlug ↗</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 3: ICAO Safety Audit -->
+            <article class="glass-dark rounded-3xl p-5 card-hover flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">ICAO Audit</span>
+                        <span class="text-[11px] text-slate-400 font-semibold">12.2~15</span>
+                    </div>
+                    <h2 class="text-lg font-black text-white leading-snug">ICAO 항공안전평가 합동 수검 체제</h2>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        범정부 '합동 수검대책반' 가동. ICAO 평가단 12명 방한 대비 <strong class="text-emerald-300">SOP 이행</strong>과 <strong class="text-emerald-300">교육·점검 기록</strong> 현행화가 핵심입니다.
+                    </p>
+
+                    <!-- 3-Badge Checklist Visual -->
+                    <div class="grid grid-cols-3 gap-2 pt-1 text-center">
+                        <div class="bg-emerald-500/10 border border-emerald-400/20 rounded-xl p-2.5">
+                            <span class="text-base block">📋</span>
+                            <span class="text-[11px] font-bold text-white block mt-1">SOP 준수</span>
+                        </div>
+                        <div class="bg-emerald-500/10 border border-emerald-400/20 rounded-xl p-2.5">
+                            <span class="text-base block">🎓</span>
+                            <span class="text-[11px] font-bold text-white block mt-1">교육 기록</span>
+                        </div>
+                        <div class="bg-emerald-500/10 border border-emerald-400/20 rounded-xl p-2.5">
+                            <span class="text-base block">🛡️</span>
+                            <span class="text-[11px] font-bold text-white block mt-1">출입 통제</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-1.5 pt-4 mt-4 border-t border-white/10">
+                    <div class="tip-wrap">
+                        <a href="https://www.korea.kr/news/pressReleaseView.do?newsId=156789149&pWise=sub&pWiseSub=J1" target="_blank" class="link-chip" data-media="대한민국 정책브리핑" data-title="기상청, 국제민간항공기구 항공안전평가 앞두고 최종 준비 총력">정책브리핑 ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://www.airportal.go.kr/news/eventNewsDetail.do?num=105611" target="_blank" class="link-chip" data-media="항공정보포털시스템" data-title="ICAO 항공안전평가 앞두고 범정부 총력 대응">항공정보포털 ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://mbiz.heraldcorp.com/article/10935897" target="_blank" class="link-chip" data-media="The Herald Business (2026.11.13)" data-title="South Korea mobilizes pan-government response ahead of ICAO aviation safety audit">Herald ↗</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 4: Screening, Radiation & Winter Ops -->
+            <article class="glass-dark rounded-3xl p-5 card-hover flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">Security &amp; Winter</span>
+                        <span class="text-[11px] text-slate-400 font-semibold">장비·보호·동계</span>
+                    </div>
+                    <h2 class="text-lg font-black text-white leading-snug">보안검색 고도화 및 현장 안전 강화</h2>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="bg-white/5 rounded-xl p-2.5 border border-white/5">
+                            <strong class="text-indigo-300">청주공항 3D 장비:</strong> 11.23 360도 3D CT X-ray·원형검색기 도입
+                        </li>
+                        <li class="bg-white/5 rounded-xl p-2.5 border border-white/5">
+                            <strong class="text-emerald-300">방사선 안전 협약:</strong> 11.19 한국공항보안·원자력환경공단 요원 보호 강화
+                        </li>
+                        <li class="bg-white/5 rounded-xl p-2.5 border border-white/5">
+                            <strong class="text-orange-300">현장·동계 대응:</strong> 11.1 돈므앙 촉수검색 강화 · 12.1 대한항공 코트룸 예고
+                        </li>
+                    </ul>
+                </div>
+                <div class="flex flex-wrap gap-1.5 pt-4 mt-4 border-t border-white/10">
+                    <div class="tip-wrap">
+                        <a href="https://www.yna.co.kr/amp/view/AKR20261123121800064" target="_blank" class="link-chip" data-media="연합뉴스 (2026.11.23)" data-title="청주공항, 국제선 출발장에 3D 판독 장비 도입">청주 3D ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://www.boannews.com/news/articleView.html?idxno=147424" target="_blank" class="link-chip" data-media="보안뉴스 (2026.11.19)" data-title="한국공항보안·한국원자력환경공단, 공항 보안검색 현장 방사선 안전관리 강화">방사선 협약 ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://deeparrival.com/news/don-mueang-airport-pat-down-security-november-1-2026/" target="_blank" class="link-chip" data-media="DeepArrival (2026.11.01)" data-title="Don Mueang Pat-Downs Start Nov. 1">돈므앙 ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://news.ifm.kr/news/articleView.html?idxno=485288" target="_blank" class="link-chip" data-media="경인방송 (2026.11.24)" data-title="2026년 11월 24일 항공리포트 (대한항공 동계 코트룸 서비스)">코트룸 ↗</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 5: Merger, AI Cargo & Smart/Eco Infra -->
+            <article class="glass-dark rounded-3xl p-5 card-hover flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30">Cargo &amp; Infra</span>
+                        <span class="text-[11px] text-slate-400 font-semibold">합병·화물·친환경</span>
+                    </div>
+                    <h2 class="text-lg font-black text-white leading-snug">합병 임박·AI 화물 호조·스마트 조업</h2>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                            <span class="text-[10px] text-teal-300 font-bold block">아·북미 화물</span>
+                            <span class="text-base font-black text-white">+17.0%</span>
+                            <span class="text-[10px] text-slate-400 block">AI 서버·데이터센터 장비</span>
+                        </div>
+                        <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                            <span class="text-[10px] text-sky-300 font-bold block">스마트 화물 목표</span>
+                            <span class="text-base font-black text-white">6.5만 톤+</span>
+                            <span class="text-[10px] text-slate-400 block">바코드 인식 99.9%+</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        12월 대한항공·아시아나 합병 마무리 국면과 인천공항 스마트 화물터미널·GSE 충전 인프라 확대로 조업·기재 변화에 대비해야 합니다.
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-1.5 pt-4 mt-4 border-t border-white/10">
+                    <div class="tip-wrap">
+                        <a href="https://www.newspim.com/news/view/20261123000115" target="_blank" class="link-chip" data-media="뉴스핌 (2026.11.23)" data-title="대한항공 '2027년 전망' 리포트 브리핑">뉴스핌 ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://www.cello-square.com/kr/whitepaper/view-643.do" target="_blank" class="link-chip" data-media="첼로스퀘어 (2026.11.16)" data-title="2026년 11월 항공 화물 수급과 노선별 운임 전망">첼로스퀘어 ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://www.mk.co.kr/news/society/12216194" target="_blank" class="link-chip" data-media="매일경제 (2026.11.23)" data-title="박남춘 인천공항공사 사장 취임…'연간 여객 9000만명 달성'">매일경제 ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://news.ifm.kr/news/articleView.html?idxno=485163" target="_blank" class="link-chip" data-media="경인방송 (2026.11.23)" data-title="2026년 11월 23일 항공리포트 (스마트 화물터미널 조성)">스마트화물 ↗</a>
+                    </div>
+                    <div class="tip-wrap">
+                        <a href="https://news.ifm.kr/news/articleView.html?idxno=484988" target="_blank" class="link-chip" data-media="경인방송 (2026.11.20)" data-title="2026년 11월 20일 항공리포트 (한국공항공사 탄소중립 경연대회 우수상)">탄소중립 ↗</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 6: Electric Aircraft CE-25A -->
+            <article class="glass-dark rounded-3xl p-5 card-hover flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">Next-Gen EV</span>
+                        <span class="text-[11px] text-slate-400 font-semibold">11월 14일</span>
+                    </div>
+                    <h2 class="text-lg font-black text-white leading-snug">전기 여객기 'CE-25A' 첫 유인 비행</h2>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        COMAC 19인승 100% 배터리 기체(덕트 팬 10기)가 16분 38초간 60.4km 비행. 계류장 접근 동선·고전압 배터리 안전 기준 선제 점검이 필요합니다.
+                    </p>
+                    <div class="grid grid-cols-3 gap-1.5 text-center pt-1">
+                        <div class="bg-white/5 rounded-xl p-2 border border-white/10">
+                            <span class="text-[10px] text-slate-400 block">최대중량</span>
+                            <span class="text-xs font-black text-amber-300">10톤</span>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-2 border border-white/10">
+                            <span class="text-[10px] text-slate-400 block">순항속도</span>
+                            <span class="text-xs font-black text-amber-300">300km/h</span>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-2 border border-white/10">
+                            <span class="text-[10px] text-slate-400 block">최대항속</span>
+                            <span class="text-xs font-black text-amber-300">400km</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-1.5 pt-4 mt-4 border-t border-white/10">
+                    <div class="tip-wrap">
+                        <a href="https://naver.me/F6QXxgr9" target="_blank" class="link-chip" data-media="연합뉴스 Yonhapnews (2026.11.16)" data-title="'16분 동안 60km 날아'…中전기여객기 'CE-25A' 첫 비행 성공">시험비행 영상 ↗</a>
+                    </div>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- 3. Light Infographic Section: Field Check & 3 Core Principles -->
+        <section class="bg-white text-slate-900 rounded-3xl p-5 sm:p-8 shadow-2xl space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full">Field Action Guide</span>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-2">현장 점검 &amp; 혼잡 시 3대 보안 원칙</h2>
+                </div>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full self-start sm:self-auto">
+                    사내 교육 자료
+                </span>
+            </div>
+
+            <!-- 4 Visual Check Badges -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                    <span class="text-xs font-black text-orange-600 block">CHECK 01</span>
+                    <h3 class="text-sm font-black text-slate-900 mt-1">비상·수동 전환</h3>
+                    <p class="text-xs text-slate-600 mt-1">이륙 중단·대규모 지연 시 비상연락망 및 수동 조업 즉시 가동 여부</p>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                    <span class="text-xs font-black text-blue-700 block">CHECK 02</span>
+                    <h3 class="text-sm font-black text-slate-900 mt-1">ICAO 수검 기록</h3>
+                    <p class="text-xs text-slate-600 mt-1">12.2~12.15 평가 대비 출입 통제·교육 이수·장비 점검 일지 현행화</p>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                    <span class="text-xs font-black text-indigo-700 block">CHECK 03</span>
+                    <h3 class="text-sm font-black text-slate-900 mt-1">3D·동계 수하물</h3>
+                    <p class="text-xs text-slate-600 mt-1">검색 지연 시 화물·수하물 분리 보관 및 작업자 안전보건 숙지</p>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                    <span class="text-xs font-black text-emerald-700 block">CHECK 04</span>
+                    <h3 class="text-sm font-black text-slate-900 mt-1">전기 기종·충전</h3>
+                    <p class="text-xs text-slate-600 mt-1">CE-25A 등 전기 기종 및 GSE 충전 인프라 안전 동선 점검</p>
+                </div>
+            </div>
+
+            <!-- Discussion & Interactive 3 Principles Accordion -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+                <div class="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-black uppercase text-orange-400 tracking-wider">임직원 토의 질문</span>
+                        <p class="text-sm font-bold text-white leading-relaxed mt-2">
+                            "9·11 이후 두 번째로 미국 전역 항공편 이륙이 멈춰 선 11월 13일 사례처럼, 관제나 운항 시스템 장애로 공항 현장에 대규모 지연과 혼잡이 발생할 때 항공보안과 현장 안전을 지키기 위해 가장 먼저 철저히 유지해야 할 핵심 원칙은 무엇입니까?"
+                        </p>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-4">※ 사내 보안 교육 토의용</p>
+                </div>
+
+                <div class="lg:col-span-7 bg-blue-50 border border-blue-200 rounded-2xl p-5 cursor-pointer" onclick="togglePrinciples(this)">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-black uppercase text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded-full">현장 권장 대응 지침 (클릭)</span>
+                        <span class="text-xs font-bold text-blue-700">3대 원칙 펼치기 ↓</span>
+                    </div>
+                    <p class="text-sm sm:text-base font-black text-slate-900 mt-2.5 leading-snug">
+                        비상 상황이나 현장 혼잡으로 일정이 급박해질수록 '보안 절차 생략 금지'와 '비인가자 보호구역 접근 통제 유지'가 최우선입니다.
+                    </p>
+                    <div class="acc-body">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
+                            <div class="bg-white rounded-xl p-3 border border-blue-200">
+                                <span class="font-black text-orange-600 block">1. 담당 구역 출입 통제 강화</span>
+                                <p class="text-slate-700 mt-1">혼잡을 틈탄 비인가자의 보호구역 진입을 철저히 차단</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-3 border border-blue-200">
+                                <span class="font-black text-blue-700 block">2. 수동 확인 절차 완벽 이행</span>
+                                <p class="text-slate-700 mt-1">수기 탑승권 및 수하물 태그 대조를 생략 없이 수행</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-3 border border-blue-200">
+                                <span class="font-black text-emerald-700 block">3. 지침 기반의 침착한 대응</span>
+                                <p class="text-slate-700 mt-1">조업·공항 당국 비상 통제 지침에 따라 표준 절차 이행</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Compact Footer -->
+        <footer class="text-center text-[11px] text-slate-400 pt-4 border-t border-white/10 space-y-1">
+            <p class="font-bold text-slate-300">© 2026 SWISSPORT KOREA · AirScope 11월호 인포그래픽</p>
+            <p>출처: FAA, CBC News, 글로벌이코노믹, 연합뉴스, MigFlug, 대한민국 정책브리핑, 항공정보포털시스템, The Herald Business, 보안뉴스, DeepArrival, 경인방송, 뉴스핌, 첼로스퀘어, 매일경제, Yonhapnews</p>
+        </footer>
+    </main>
+
+    <script>
+        // Floating Article Preview Tooltip (Hover + Focus + Mobile Tap Preview)
+        const tipEl = document.getElementById('floatingTip');
+        const tipMedia = document.getElementById('tipMedia');
+        const tipTitle = document.getElementById('tipTitle');
+        let activeLink = null;
+
+        function positionTip(target) {
+            const rect = target.getBoundingClientRect();
+            const tipRect = tipEl.getBoundingClientRect();
+            const margin = 12;
+            let left = rect.left + rect.width / 2 - tipRect.width / 2;
+            left = Math.max(margin, Math.min(left, window.innerWidth - tipRect.width - margin));
+
+            let top = rect.top - tipRect.height - 8;
+            if (top < margin + 70) {
+                top = rect.bottom + 8;
+            }
+            tipEl.style.left = `${left}px`;
+            tipEl.style.top = `${top}px`;
+        }
+
+        function showTip(link) {
+            const media = link.getAttribute('data-media') || '';
+            const title = link.getAttribute('data-title') || '';
+            if (!media && !title) return;
+            tipMedia.textContent = media;
+            tipTitle.textContent = title;
+            tipEl.classList.add('show');
+            tipEl.setAttribute('aria-hidden', 'false');
+            activeLink = link;
+            positionTip(link);
+        }
+
+        function hideTip() {
+            tipEl.classList.remove('show');
+            tipEl.setAttribute('aria-hidden', 'true');
+            activeLink = null;
+        }
+
+        document.querySelectorAll('.link-chip').forEach(link => {
+            link.addEventListener('mouseenter', () => showTip(link));
+            link.addEventListener('focus', () => showTip(link));
+            link.addEventListener('mouseleave', hideTip);
+            link.addEventListener('blur', hideTip);
+
+            // On touch devices, first tap shows floating title if not already active; second tap opens link
+            link.addEventListener('click', (e) => {
+                const isTouch = window.matchMedia('(hover: none)').matches;
+                if (isTouch && activeLink !== link) {
+                    e.preventDefault();
+                    showTip(link);
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            if (activeLink) positionTip(activeLink);
+        }, { passive: true });
+        window.addEventListener('resize', () => {
+            if (activeLink) positionTip(activeLink);
+        });
+
+        // Podcast Audio Player
+        const audio = document.getElementById('podcastAudio');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (audio.paused) {
+                audio.play().catch(() => {});
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                audio.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            if (isFinite(audio.duration) && audio.duration > 0) {
+                progressBar.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+                const m = Math.floor(audio.currentTime / 60);
+                const s = Math.floor(audio.currentTime % 60);
+                currentTimeEl.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+            }
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            if (isFinite(audio.duration) && audio.duration > 0) {
+                audio.currentTime = ratio * audio.duration;
+            }
+        });
+
+        function togglePrinciples(el) {
+            const body = el.querySelector('.acc-body');
+            const label = el.querySelector('span:last-of-type');
+            const opened = body.classList.toggle('open');
+            if (label) label.innerText = opened ? '3대 원칙 접기 ↑' : '3대 원칙 펼치기 ↓';
+        }
+
+        new Chart(document.getElementById('mainMetricsChart'), {
+            type: 'bar',
+            data: {
+                labels: ['이륙 중단 (시간)', '아·북미 화물 (%)', 'CE-25A 비행 (분)'],
+                datasets: [{
+                    data: [4.42, 17.0, 16.63],
+                    backgroundColor: ['#FF6B00', '#10B981', '#38BDF8'],
+                    borderRadius: 8,
+                    barThickness: 34
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#CBD5E1', font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { color: '#CBD5E1', font: { size: 10 } } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
